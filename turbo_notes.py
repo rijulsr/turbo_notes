@@ -41,7 +41,8 @@ class TurboNotes:
             "notes": [],
             "tasks": [],
             "categories": ["Personal", "Work", "Ideas"],
-            "last_accessed": None
+            "last_accessed": None,
+            "password_enabled": None
         }
         
     def generate_key_from_password(self, password: str) -> bytes:
@@ -65,73 +66,91 @@ class TurboNotes:
         return key
     
     def setup_encryption(self) -> bool:
-        """Setup encryption with password"""
+        """Setup encryption with password, or allow user to skip password protection"""
         try:
-            # Try to get stored password hash
             stored_password = keyring.get_password(self.app_name, "master_password")
-            
+            # Check if user has already chosen not to use a password
+            if self.data.get("password_enabled") is False:
+                self.cipher_suite = None
+                return True
             if stored_password is None:
-                # First time setup
+                # First time setup or after disabling password
                 self.console.print("\n[bold blue]Welcome to Turbo Notes![/bold blue]")
-                self.console.print("Set up your master password for encryption:")
-                
-                while True:
-                    password = getpass.getpass("Enter master password: ")
-                    confirm_password = getpass.getpass("Confirm master password: ")
-                    
-                    if password == confirm_password and len(password) >= 6:
-                        # Store password hash for verification
-                        keyring.set_password(self.app_name, "master_password", password)
-                        key = self.generate_key_from_password(password)
-                        self.cipher_suite = Fernet(key)
-                        self.console.print("[green]✓ Password set successfully![/green]")
-                        return True
-                    elif len(password) < 6:
-                        self.console.print("[red]Password must be at least 6 characters long.[/red]")
-                    else:
-                        self.console.print("[red]Passwords don't match. Try again.[/red]")
+                set_pw = Prompt.ask("Do you want to set a password for your notes and tasks? (y/n, default: n)", choices=["y", "n"], default="n")
+                if set_pw.lower() == "y":
+                    self.console.print("Set up your master password for encryption:")
+                    while True:
+                        password = getpass.getpass("Enter master password: ")
+                        confirm_password = getpass.getpass("Confirm master password: ")
+                        if password == confirm_password and len(password) >= 6:
+                            keyring.set_password(self.app_name, "master_password", password)
+                            key = self.generate_key_from_password(password)
+                            self.cipher_suite = Fernet(key)
+                            self.data["password_enabled"] = True
+                            self.save_data()
+                            self.console.print("[green]✓ Password set successfully![/green]")
+                            return True
+                        elif len(password) < 6:
+                            self.console.print("[red]Password must be at least 6 characters long.[/red]")
+                        else:
+                            self.console.print("[red]Passwords don't match. Try again.[/red]")
+                else:
+                    # User chose not to set a password; operate in unencrypted mode
+                    self.cipher_suite = None
+                    self.data["password_enabled"] = False
+                    self.save_data()
+                    return True
             else:
                 # Verify existing password
                 password = getpass.getpass("Enter master password: ")
                 if password == stored_password:
                     key = self.generate_key_from_password(password)
                     self.cipher_suite = Fernet(key)
+                    self.data["password_enabled"] = True
+                    self.save_data()
                     return True
                 else:
                     self.console.print("[red]Incorrect password![/red]")
                     return False
-                    
         except Exception as e:
             self.console.print(f"[red]Encryption setup failed: {e}[/red]")
             return False
     
     def load_data(self) -> bool:
-        """Load and decrypt data from file"""
+        """Load and decrypt data from file, or load unencrypted if password is disabled"""
         if not self.data_file.exists():
             return True  # First run, no data to load
-            
         try:
-            with open(self.data_file, 'rb') as f:
-                encrypted_data = f.read()
-            
-            decrypted_data = self.cipher_suite.decrypt(encrypted_data)
-            self.data = json.loads(decrypted_data.decode())
-            return True
-            
+            stored_password = keyring.get_password(self.app_name, "master_password")
+            if stored_password is None:
+                # Load unencrypted
+                with open(self.data_file, 'r') as f:
+                    self.data = json.load(f)
+                return True
+            else:
+                with open(self.data_file, 'rb') as f:
+                    encrypted_data = f.read()
+                decrypted_data = self.cipher_suite.decrypt(encrypted_data)
+                self.data = json.loads(decrypted_data.decode())
+                return True
         except Exception as e:
             self.console.print(f"[red]Failed to load data: {e}[/red]")
             return False
     
     def save_data(self):
-        """Encrypt and save data to file"""
+        """Encrypt and save data to file, or save unencrypted if password is disabled"""
         try:
             self.data["last_accessed"] = datetime.now().isoformat()
             json_data = json.dumps(self.data, indent=2)
-            encrypted_data = self.cipher_suite.encrypt(json_data.encode())
-            
-            with open(self.data_file, 'wb') as f:
-                f.write(encrypted_data)
-                
+            stored_password = keyring.get_password(self.app_name, "master_password")
+            if stored_password is None:
+                # Save unencrypted
+                with open(self.data_file, 'w') as f:
+                    f.write(json_data)
+            else:
+                encrypted_data = self.cipher_suite.encrypt(json_data.encode())
+                with open(self.data_file, 'wb') as f:
+                    f.write(encrypted_data)
         except Exception as e:
             self.console.print(f"[red]Failed to save data: {e}[/red]")
     
@@ -502,9 +521,10 @@ class TurboNotes:
         self.console.print("1. Add Category")
         self.console.print("2. Export Data")
         self.console.print("3. Data Statistics")
-        self.console.print("4. Back to Main Menu")
+        self.console.print("4. Password & Security")
+        self.console.print("5. Back to Main Menu")
         
-        choice = Prompt.ask("\nSelect option", choices=["1", "2", "3", "4"])
+        choice = Prompt.ask("\nSelect option", choices=["1", "2", "3", "4", "5"])
         
         if choice == "1":
             new_category = Prompt.ask("New category name")
@@ -536,8 +556,105 @@ class TurboNotes:
             """
             self.console.print(stats)
         
-        if choice != "4":
+        elif choice == "4":
+            self.password_security_menu()
+        
+        if choice != "5":
             input("\nPress Enter to continue...")
+
+    def password_security_menu(self):
+        """Password & Security submenu for changing/disabling/enabling password"""
+        self.console.print("\n[bold blue]🔑 Password & Security[/bold blue]")
+        self.console.print("1. Change Password")
+        self.console.print("2. Disable Password (store data unencrypted)")
+        self.console.print("3. Enable Password (encrypt data)")
+        self.console.print("4. Back to Settings")
+        choice = Prompt.ask("\nSelect option", choices=["1", "2", "3", "4"])
+        if choice == "1":
+            self.change_password()
+        elif choice == "2":
+            self.disable_password()
+        elif choice == "3":
+            self.enable_password()
+        # '4' just returns
+
+    def change_password(self):
+        """Change the master password and re-encrypt data"""
+        stored_password = keyring.get_password(self.app_name, "master_password")
+        if stored_password is None:
+            self.console.print("[red]No password is currently set. Please enable password first.[/red]")
+            return
+        old_password = getpass.getpass("Enter current password: ")
+        if old_password != stored_password:
+            self.console.print("[red]Incorrect password.[/red]")
+            return
+        while True:
+            new_password = getpass.getpass("Enter new password: ")
+            confirm_password = getpass.getpass("Confirm new password: ")
+            if new_password == confirm_password and len(new_password) >= 6:
+                # Re-encrypt data with new password
+                key = self.generate_key_from_password(new_password)
+                self.cipher_suite = Fernet(key)
+                keyring.set_password(self.app_name, "master_password", new_password)
+                self.save_data()
+                self.console.print("[green]✓ Password changed successfully![/green]")
+                return
+            elif len(new_password) < 6:
+                self.console.print("[red]Password must be at least 6 characters long.[/red]")
+            else:
+                self.console.print("[red]Passwords don't match. Try again.[/red]")
+
+    def disable_password(self):
+        """Remove password protection and store data unencrypted"""
+        stored_password = keyring.get_password(self.app_name, "master_password")
+        if stored_password is None:
+            self.console.print("[yellow]Password is already disabled.[/yellow]")
+            return
+        password = getpass.getpass("Enter current password to disable: ")
+        if password != stored_password:
+            self.console.print("[red]Incorrect password.[/red]")
+            return
+        # Save data unencrypted
+        self.save_data_unencrypted()
+        keyring.delete_password(self.app_name, "master_password")
+        if self.salt_file.exists():
+            self.salt_file.unlink()
+        self.cipher_suite = None
+        self.data["password_enabled"] = False
+        self.save_data_unencrypted()
+        self.console.print("[green]✓ Password disabled. Data is now stored unencrypted![/green]")
+
+    def enable_password(self):
+        """Enable password protection and encrypt data"""
+        stored_password = keyring.get_password(self.app_name, "master_password")
+        if stored_password is not None:
+            self.console.print("[yellow]Password is already enabled.[/yellow]")
+            return
+        while True:
+            password = getpass.getpass("Set new master password: ")
+            confirm_password = getpass.getpass("Confirm new password: ")
+            if password == confirm_password and len(password) >= 6:
+                keyring.set_password(self.app_name, "master_password", password)
+                key = self.generate_key_from_password(password)
+                self.cipher_suite = Fernet(key)
+                self.data["password_enabled"] = True
+                self.save_data()
+                self.console.print("[green]✓ Password enabled and data encrypted![/green]")
+                return
+            elif len(password) < 6:
+                self.console.print("[red]Password must be at least 6 characters long.[/red]")
+            else:
+                self.console.print("[red]Passwords don't match. Try again.[/red]")
+
+    def save_data_unencrypted(self):
+        """Save data unencrypted to file"""
+        try:
+            self.data["last_accessed"] = datetime.now().isoformat()
+            json_data = json.dumps(self.data, indent=2)
+            with open(self.data_file, 'w') as f:
+                f.write(json_data)
+        except Exception as e:
+            self.console.print(f"[red]Failed to save data: {e}[/red]")
 
     def run(self):
         """Main application entry point"""
@@ -558,26 +675,23 @@ class TurboNotes:
 def main(add_note, add_task, list_tasks, dashboard):
     """Turbo Notes - Secure Terminal Note & Task Manager"""
     app = TurboNotes()
-    
+    # Load existing data first to get password preference
+    app.load_data()
     # Setup encryption
     if not app.setup_encryption():
         sys.exit(1)
-    
-    # Load existing data
+    # Reload data in case encryption setup changed anything
     if not app.load_data():
         sys.exit(1)
-    
     # Handle command line options
     if add_note:
         app.add_note("Quick Note", add_note)
         app.console.print("[green]✓ Note added![/green]")
         return
-    
     if add_task:
         app.add_task(add_task)
         app.console.print("[green]✓ Task added![/green]")
         return
-    
     if list_tasks:
         pending = [t for t in app.data["tasks"] if not t["completed"]]
         if pending:
@@ -586,11 +700,9 @@ def main(add_note, add_task, list_tasks, dashboard):
         else:
             print("No pending tasks!")
         return
-    
     if dashboard:
         app.display_dashboard()
         return
-    
     # Run interactive mode
     app.run()
 
