@@ -680,9 +680,10 @@ def main(add_note, add_task, list_tasks, dashboard):
     # Setup encryption
     if not app.setup_encryption():
         sys.exit(1)
-    # Reload data in case encryption setup changed anything
-    if not app.load_data():
-        sys.exit(1)
+    # Only reload data if running interactive mode
+    if not (add_note or add_task or list_tasks or dashboard):
+        if not app.load_data():
+            sys.exit(1)
     # Handle command line options
     if add_note:
         app.add_note("Quick Note", add_note)
