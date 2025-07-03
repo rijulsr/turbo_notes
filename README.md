@@ -161,10 +161,10 @@ This is a simple personal tool, but feel free to:
 - Suggest features
 - Submit improvements
 
-## 📝 License
+## License
 
 MIT License - Use it however you want!
 
-## 🎉 Enjoy!
+## Enjoy!
 
 Turbo Notes is designed to be simple, secure, and get out of your way. Focus on what matters - your notes and tasks! 
