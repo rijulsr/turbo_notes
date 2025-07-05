@@ -101,7 +101,7 @@ rm ~/.config/autostart/turbo-notes.desktop
 ### Shell Alias
 A convenient `tn` alias is added to your shell configuration. You can use it instead of typing the full command.
 
-## 🔧 Manual Installation
+## Manual Installation
 
 If the setup script doesn't work:
 
