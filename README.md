@@ -121,7 +121,7 @@ If the setup script doesn't work:
    source ~/.bashrc
    ```
 
-## 📊 Data Management
+## Data Management
 
 ### Export Data
 Use the settings menu (option 8) to export your data to an unencrypted JSON file for backup.
