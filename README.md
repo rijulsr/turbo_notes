@@ -154,7 +154,7 @@ ls ~/.config/autostart/turbo-notes.desktop
 ### Forgot master password
 Unfortunately, there's no password recovery. You'll need to delete `~/.turbo-notes/` and start fresh.
 
-## 🤝 Contributing
+## Contributing
 
 This is a simple personal tool, but feel free to:
 - Report bugs
