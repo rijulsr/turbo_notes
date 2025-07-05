@@ -90,7 +90,7 @@ When you log in, Turbo Notes automatically shows:
 - **Recent Notes**: Your latest notes
 - **Quick Stats**: Overview of your data
 
-## ⚙️ Configuration
+## Configuration
 
 ### Auto-Start
 The setup script automatically configures Turbo Notes to show your dashboard when you log in. To disable:
