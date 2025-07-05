@@ -132,7 +132,7 @@ Default categories: Personal, Work, Ideas. Add custom categories through the set
 ### Backup
 Your encrypted data is stored in `~/.turbo-notes/`. Back up this directory to preserve your data.
 
-## 🐛 Troubleshooting
+## Troubleshooting
 
 ### "Module not found" errors
 ```bash
