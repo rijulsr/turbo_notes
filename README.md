@@ -14,7 +14,7 @@ A secure, minimalist terminal-based note and task manager that automatically sho
 - **💻 Terminal-Based**: Clean, fast terminal interface
 - **🌐 Local Only**: Everything stays on your computer
 
-## 🛠️ Quick Setup
+## Quick Setup
 
 1. **Clone and setup**:
    ```bash
