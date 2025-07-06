@@ -29,7 +29,7 @@ A secure, minimalist terminal-based note and task manager that automatically sho
    tn
    ```
 
-## 📋 Requirements
+## Requirements
 
 - Python 3.7+
 - Linux (tested on Ubuntu/Debian)
