@@ -1,8 +1,8 @@
-# 🚀 Turbo Notes
+# 🚀 Turbo Noteds
 
 A secure, minimalist terminal-based note and task manager that automatically shows your important tasks when you log in.
 
-## ✨ Features
+## Features
 
 - **🔐 Encrypted Storage**: All your notes and tasks are encrypted with your master password
 - **⚡ Auto-Launch**: Automatically opens on login to show your important tasks
@@ -36,7 +36,7 @@ A secure, minimalist terminal-based note and task manager that automatically sho
 - Terminal emulator
 - Internet connection for initial setup (to install packages)
 
-## 🚀 Usage
+## Usage
 
 ### Interactive Mode
 ```bash
