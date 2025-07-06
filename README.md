@@ -1,4 +1,4 @@
-# Turbo Noteds
+# Turbo Notes
 
 A secure, minimalist terminal-based note and task manager that automatically shows your important tasks when you log in.
 
@@ -90,7 +90,7 @@ When you log in, Turbo Notes automatically shows:
 - **Recent Notes**: Your latest notes
 - **Quick Stats**: Overview of your data
 
-## ⚙️ Configuration
+## Configuration
 
 ### Auto-Start
 The setup script automatically configures Turbo Notes to show your dashboard when you log in. To disable:
@@ -101,7 +101,7 @@ rm ~/.config/autostart/turbo-notes.desktop
 ### Shell Alias
 A convenient `tn` alias is added to your shell configuration. You can use it instead of typing the full command.
 
-## 🔧 Manual Installation
+## Manual Installation
 
 If the setup script doesn't work:
 
@@ -121,7 +121,7 @@ If the setup script doesn't work:
    source ~/.bashrc
    ```
 
-## 📊 Data Management
+## Data Management
 
 ### Export Data
 Use the settings menu (option 8) to export your data to an unencrypted JSON file for backup.
@@ -132,7 +132,7 @@ Default categories: Personal, Work, Ideas. Add custom categories through the set
 ### Backup
 Your encrypted data is stored in `~/.turbo-notes/`. Back up this directory to preserve your data.
 
-## 🐛 Troubleshooting
+## Troubleshooting
 
 ### "Module not found" errors
 ```bash
@@ -154,17 +154,17 @@ ls ~/.config/autostart/turbo-notes.desktop
 ### Forgot master password
 Unfortunately, there's no password recovery. You'll need to delete `~/.turbo-notes/` and start fresh.
 
-## 🤝 Contributing
+## Contributing
 
 This is a simple personal tool, but feel free to:
 - Report bugs
 - Suggest features
 - Submit improvements
 
-## 📝 License
+## License
 
 MIT License - Use it however you want!
 
-## 🎉 Enjoy!
+## Enjoy!
 
 Turbo Notes is designed to be simple, secure, and get out of your way. Focus on what matters - your notes and tasks! 
