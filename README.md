@@ -1,4 +1,4 @@
-# 🚀 Turbo Noteds
+# Turbo Noteds
 
 A secure, minimalist terminal-based note and task manager that automatically shows your important tasks when you log in.
 
