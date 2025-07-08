@@ -31,8 +31,8 @@ A secure, minimalist terminal-based note and task manager that automatically sho
 - **📅 Due Dates**: Track deadlines and get overdue warnings
 - **🔍 Search**: Quick search across all notes and tasks
 - **📂 Categories**: Organize content with custom categories
-- **💻 Terminal-Based**: Clean, fast terminal interface
-- ** Local Only**: Everything stays on your computer
+- **Terminal-Based**: Clean, fast terminal interface
+- **Local Only**: Everything stays on your computer
 
 ## Quick Setup
 
