@@ -73,7 +73,15 @@ class TurboNotes:
                 self.cipher_suite = None
                 return True
             if stored_password is None:
-                # First time setup or after disabling password
+                # Try to load data assuming unencrypted to check password_enabled
+                if self.data_file.exists():
+                    try:
+                        with open(self.data_file, 'r') as f:
+                            self.data = json.load(f)
+                        return True  # Successfully loaded unencrypted data, no need for password
+                    except (json.JSONDecodeError, Exception) as e:
+                        self.console.print(f"[yellow]Warning: Could not load unencrypted data: {e}. Treating as first run.[/yellow]")
+                # If no data or load failed, proceed to prompt
                 self.console.print("\n[bold blue]Welcome to Turbo Notes![/bold blue]")
                 set_pw = Prompt.ask("Do you want to set a password for your notes and tasks? (y/n, default: n)", choices=["y", "n"], default="n")
                 if set_pw.lower() == "y":
@@ -165,8 +173,80 @@ class TurboNotes:
         self.data["notes"].append(note)
         self.save_data()
     
+    def add_task(self, title: str, description: str = "", priority: str = "Medium", 
+                 due_date: str = None, category: str = "Personal"):
+        """Add a new task"""
+        if "tasks" not in self.data:
+            self.data["tasks"] = []
+        
+        task = {
+            "id": len(self.data["tasks"]) + 1,
+            "title": title,
+            "description": description,
+            "priority": priority,
+            "due_date": due_date,
+            "category": category,
+            "completed": False,
+            "created": datetime.now().isoformat(),
+            "modified": datetime.now().isoformat()
+        }
+        self.data["tasks"].append(task)
+        self.save_data()
+        return task
+    
+    def complete_task(self, task_id: int):
+        """Mark task as completed"""
+        if "tasks" not in self.data:
+            return False
+        
+        for task in self.data["tasks"]:
+            if task["id"] == task_id:
+                task["completed"] = True
+                task["completed_date"] = datetime.now().isoformat()
+                self.save_data()
+                return True
+        return False
+    
+    def get_overdue_tasks(self):
+        """Get tasks that are overdue"""
+        if "tasks" not in self.data:
+            return []
+        
+        today = datetime.now().date()
+        overdue = []
+        
+        for task in self.data["tasks"]:
+            if not task["completed"] and task.get("due_date"):
+                try:
+                    due_date = datetime.fromisoformat(task["due_date"]).date()
+                    if due_date < today:
+                        overdue.append(task)
+                except:
+                    continue
+        
+        return overdue
+    
+    def get_today_tasks(self):
+        """Get tasks due today"""
+        if "tasks" not in self.data:
+            return []
+        
+        today = datetime.now().date()
+        today_tasks = []
+        
+        for task in self.data["tasks"]:
+            if not task["completed"] and task.get("due_date"):
+                try:
+                    due_date = datetime.fromisoformat(task["due_date"]).date()
+                    if due_date == today:
+                        today_tasks.append(task)
+                except:
+                    continue
+        
+        return today_tasks
+
     def display_dashboard(self):
-        """Display the main dashboard (notes only)"""
+        """Display the main dashboard with tasks and notes"""
         self.console.clear()
         
         # ASCII Art Banner
@@ -200,8 +280,43 @@ class TurboNotes:
         )
         self.console.print(date_header)
         
-        stats_text = f"📝 {len(self.data['notes'])} Notes"
+        # Initialize tasks if not exists
+        if "tasks" not in self.data:
+            self.data["tasks"] = []
+        
+        # Stats
+        stats_text = f"📝 {len(self.data['notes'])} Notes • ✅ {len(self.data['tasks'])} Tasks"
         self.console.print(f"\n{stats_text}\n")
+        
+        # Overdue tasks
+        overdue_tasks = self.get_overdue_tasks()
+        if overdue_tasks:
+            self.console.print("[bold red]⚠️  OVERDUE TASKS:[/bold red]")
+            for task in overdue_tasks[:3]:
+                task_panel = Panel(
+                    f"[bold]{task['title']}[/bold]\n{task.get('description', '')}\n[red]Due: {task.get('due_date', 'No due date')[:10]}[/red]",
+                    title=f"Task #{task['id']} - {task['priority']} Priority",
+                    border_style="red",
+                    padding=(0, 1)
+                )
+                self.console.print(task_panel)
+            self.console.print()
+        
+        # Today's tasks
+        today_tasks = self.get_today_tasks()
+        if today_tasks:
+            self.console.print("[bold yellow]📅 DUE TODAY:[/bold yellow]")
+            for task in today_tasks[:3]:
+                task_panel = Panel(
+                    f"[bold]{task['title']}[/bold]\n{task.get('description', '')}\n[yellow]Due: Today[/yellow]",
+                    title=f"Task #{task['id']} - {task['priority']} Priority",
+                    border_style="yellow",
+                    padding=(0, 1)
+                )
+                self.console.print(task_panel)
+            self.console.print()
+        
+        # Recent notes
         if self.data["notes"]:
             self.console.print("[bold green]📄 RECENT NOTES:[/bold green]")
             recent_notes = sorted(self.data["notes"], key=lambda x: x["modified"], reverse=True)[:3]
@@ -217,28 +332,35 @@ class TurboNotes:
             self.console.print()
     
     def interactive_menu(self):
-        """Main interactive menu (notes only)"""
+        """Main interactive menu with tasks and notes"""
         while True:
             self.display_dashboard()
             self.console.print("[bold]Quick Actions:[/bold]")
             self.console.print("1. 📝 Add Note")
             self.console.print("2. 📚 View All Notes")
-            self.console.print("3. 🗑️  Delete Note")
-            self.console.print("4. 🔍 Search")
-            self.console.print("5. ⚙️  Settings")
-            self.console.print("6. 🚪 Exit")
-            choice = Prompt.ask("\nSelect an option", choices=["1", "2", "3", "4", "5", "6"])
+            self.console.print("3. ✅ Add Task")
+            self.console.print("4. 📋 View All Tasks")
+            self.console.print("5. ✔️  Complete Task")
+            self.console.print("6. 🔍 Search")
+            self.console.print("7. ⚙️  Settings")
+            self.console.print("8. 🚪 Exit")
+            choice = Prompt.ask("\nSelect an option", choices=["1", "2", "3", "4", "5", "6", "7", "8"])
+            
             if choice == "1":
                 self.add_note_interactive()
             elif choice == "2":
                 self.view_notes()
             elif choice == "3":
-                self.delete_note_interactive()
+                self.add_task_interactive()
             elif choice == "4":
-                self.search_interactive()
+                self.view_tasks()
             elif choice == "5":
-                self.settings_menu()
+                self.complete_task_interactive()
             elif choice == "6":
+                self.search_interactive()
+            elif choice == "7":
+                self.settings_menu()
+            elif choice == "8":
                 self.console.print("\n[bold blue]👋 See you later![/bold blue]")
                 break
     
@@ -306,20 +428,131 @@ class TurboNotes:
         input("\nPress Enter to continue...")
     
     def search_interactive(self):
-        """Search notes only"""
+        """Search notes and tasks"""
         self.console.print("\n[bold blue]🔍 Search[/bold blue]")
         query = Prompt.ask("Search term").lower()
+        
+        # Search notes
         matching_notes = []
         for note in self.data["notes"]:
             if (query in note["title"].lower() or query in note["content"].lower()):
                 matching_notes.append(note)
+        
+        # Search tasks
+        matching_tasks = []
+        if "tasks" in self.data:
+            for task in self.data["tasks"]:
+                if (query in task["title"].lower() or 
+                    query in task.get("description", "").lower()):
+                    matching_tasks.append(task)
+        
         self.console.print(f"\n[bold]Search results for '{query}':[/bold]\n")
+        
         if matching_notes:
             self.console.print("[bold green]📄 Notes:[/bold green]")
             for note in matching_notes:
                 self.console.print(f"  • {note['title']}")
-        else:
+        
+        if matching_tasks:
+            self.console.print("[bold yellow]📋 Tasks:[/bold yellow]")
+            for task in matching_tasks:
+                status = "✅" if task["completed"] else "⏳"
+                self.console.print(f"  • {status} {task['title']} ({task['priority']})")
+        
+        if not matching_notes and not matching_tasks:
             self.console.print("[dim]No results found.[/dim]")
+        
+        input("\nPress Enter to continue...")
+    
+    def add_task_interactive(self):
+        """Interactive task addition"""
+        self.console.print("\n[bold blue]✅ Add New Task[/bold blue]")
+        title = Prompt.ask("Task title")
+        description = Prompt.ask("Task description (optional)", default="")
+        priority = Prompt.ask("Priority", choices=["High", "Medium", "Low"], default="Medium")
+        
+        due_date_input = Prompt.ask("Due date (YYYY-MM-DD, optional)", default="")
+        due_date = due_date_input if due_date_input else None
+        
+        category = Prompt.ask("Category", choices=self.data["categories"], default="Personal")
+        
+        self.add_task(title, description, priority, due_date, category)
+        self.console.print("[green]✓ Task added successfully![/green]")
+        input("\nPress Enter to continue...")
+    
+    def view_tasks(self):
+        """Display all tasks"""
+        self.console.clear()
+        self.console.print("\n[bold blue]📋 All Tasks[/bold blue]\n")
+        
+        if "tasks" not in self.data or not self.data["tasks"]:
+            self.console.print("[dim]No tasks found.[/dim]")
+            input("\nPress Enter to continue...")
+            return
+        
+        # Group tasks by status
+        pending_tasks = [t for t in self.data["tasks"] if not t["completed"]]
+        completed_tasks = [t for t in self.data["tasks"] if t["completed"]]
+        
+        if pending_tasks:
+            self.console.print("[bold yellow]📋 PENDING TASKS:[/bold yellow]")
+            for task in sorted(pending_tasks, key=lambda x: x["created"], reverse=True):
+                status_color = {"High": "red", "Medium": "yellow", "Low": "green"}.get(task["priority"], "white")
+                panel_content = f"[bold]{task['title']}[/bold]\n\n{task['description']}\n\n[{status_color}]Priority: {task['priority']}[/{status_color}]"
+                if task.get("due_date"):
+                    panel_content += f"\n[blue]Due: {task['due_date'][:10]}[/blue]"
+                
+                panel = Panel(
+                    panel_content,
+                    title=f"Task #{task['id']} - {task['category']}",
+                    border_style=status_color
+                )
+                self.console.print(panel)
+        
+        if completed_tasks:
+            self.console.print("\n[bold green]✅ COMPLETED TASKS:[/bold green]")
+            for task in sorted(completed_tasks, key=lambda x: x.get("completed_date", ""), reverse=True)[:5]:
+                panel_content = f"[bold]{task['title']}[/bold]\n\n{task['description']}"
+                if task.get("completed_date"):
+                    panel_content += f"\n[green]Completed: {task['completed_date'][:10]}[/green]"
+                
+                panel = Panel(
+                    panel_content,
+                    title=f"Task #{task['id']} - {task['category']}",
+                    border_style="green"
+                )
+                self.console.print(panel)
+        
+        input("\nPress Enter to continue...")
+    
+    def complete_task_interactive(self):
+        """Complete a task interactively"""
+        self.console.print("\n[bold blue]✔️  Complete Task[/bold blue]")
+        
+        if "tasks" not in self.data or not self.data["tasks"]:
+            self.console.print("[dim]No tasks found.[/dim]")
+            input("\nPress Enter to continue...")
+            return
+        
+        pending_tasks = [t for t in self.data["tasks"] if not t["completed"]]
+        if not pending_tasks:
+            self.console.print("[dim]No pending tasks found.[/dim]")
+            input("\nPress Enter to continue...")
+            return
+        
+        self.console.print("Pending tasks:")
+        for task in pending_tasks:
+            self.console.print(f"{task['id']}. {task['title']} ({task['priority']} priority)")
+        
+        try:
+            task_id = int(Prompt.ask("\nEnter task ID to complete"))
+            if self.complete_task(task_id):
+                self.console.print("[green]✓ Task completed! 🎉[/green]")
+            else:
+                self.console.print("[red]Task not found.[/red]")
+        except ValueError:
+            self.console.print("[red]Invalid task ID.[/red]")
+        
         input("\nPress Enter to continue...")
     
     def settings_menu(self):
@@ -464,24 +697,48 @@ class TurboNotes:
 
 @click.command()
 @click.option('--add-note', '-n', help='Add a quick note')
+@click.option('--add-task', '-t', help='Add a quick task')
+@click.option('--list-tasks', '-l', is_flag=True, help='List pending tasks')
 @click.option('--dashboard', '-d', is_flag=True, help='Show dashboard and exit')
-def main(add_note, dashboard):
-    """Turbo Notes - Secure Terminal Note Manager"""
+def main(add_note, add_task, list_tasks, dashboard):
+    """Turbo Notes - Secure Terminal Note & Task Manager"""
     app = TurboNotes()
-    app.load_data()
     if not app.setup_encryption():
         sys.exit(1)
-    if not (add_note or dashboard):
-        if not app.load_data():
-            sys.exit(1)
+    if not app.load_data():
+        sys.exit(1)
+    
     if add_note:
         app.add_note("Quick Note", add_note)
         app.console.print("[green]✓ Note added![/green]")
         return
+    
+    if add_task:
+        app.add_task("Quick Task", add_task)
+        app.console.print("[green]✓ Task added![/green]")
+        return
+    
+    if list_tasks:
+        if "tasks" not in app.data:
+            app.data["tasks"] = []
+        
+        pending_tasks = [t for t in app.data["tasks"] if not t["completed"]]
+        if pending_tasks:
+            app.console.print("[bold yellow]📋 Pending Tasks:[/bold yellow]")
+            for task in pending_tasks:
+                priority_color = {"High": "red", "Medium": "yellow", "Low": "green"}.get(task["priority"], "white")
+                app.console.print(f"[{priority_color}]• {task['title']} ({task['priority']})[/{priority_color}]")
+                if task.get("due_date"):
+                    app.console.print(f"  Due: {task['due_date'][:10]}")
+        else:
+            app.console.print("[dim]No pending tasks.[/dim]")
+        return
+    
     if dashboard:
         app.display_dashboard()
         return
-    app.run()
+    
+    app.interactive_menu()
 
 if __name__ == "__main__":
     main() 
