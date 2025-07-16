@@ -46,3 +46,7 @@ turbo_notes_export_*.json
 
 # Logs
 *.log 
+
+# Buildozer
+.buildozer/
+bin/ 
