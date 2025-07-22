@@ -1,345 +1,198 @@
-# Turbo Notes - Complete Productivity Suite
+# 🚀 Turbo Notes - Secure Cross-Platform Note & Task Manager
 
-```
-╔══════════════════════════════════════════════════════════════╗
-║                                                              ║
-║    ████████╗██╗   ██╗██████╗ ██████╗  ██████╗             ║
-║    ╚══██╔══╝██║   ██║██╔══██╗██╔══██╗██╔═══██╗             ║
-║       ██║   ██║   ██║██████╔╝██████╔╝██║   ██║             ║
-║       ██║   ██║   ██║██╔══██╗██╔══██╗██║   ██║             ║
-║       ██║   ╚██████╔╝██████╔╝██║  ██║╚██████╔╝             ║
-║       ╚═╝    ╚═════╝ ╚═════╝ ╚═╝  ╚═╝ ╚═════╝              ║
-║                                                              ║
-║                    ███╗   ██╗ ██████╗ ████████╗███████╗     ║
-║                    ████╗  ██║██╔═══██╗╚══██╔══╝██╔════╝     ║
-║                    ██╔██╗ ██║██║   ██║   ██║   █████╗       ║
-║                    ██║╚██╗██║██║   ██║   ██║   ██╔══╝       ║
-║                    ██║ ╚████║╚██████╔╝   ██║   ███████╗     ║
-║                    ╚═╝  ╚═══╝ ╚═════╝    ╚═╝   ╚══════╝     ║
-║                                                              ║
-╚══════════════════════════════════════════════════════════════╝
-```
-
-**A secure, cross-platform productivity suite with desktop terminal interface and Android mobile app. Built by developers, for developers.**
-
-[![Build Status](https://github.com/yourusername/Turbo-notes/workflows/Android%20Build%20and%20Release/badge.svg)](https://github.com/yourusername/Turbo-notes/actions)
+[![🚀 Turbo Notes CI/CD](https://github.com/rijul-kansal/Turbo-notes/actions/workflows/ci.yml/badge.svg)](https://github.com/rijul-kansal/Turbo-notes/actions/workflows/ci.yml)
+[![⚡ Quick Tests](https://github.com/rijul-kansal/Turbo-notes/actions/workflows/quick-test.yml/badge.svg)](https://github.com/rijul-kansal/Turbo-notes/actions/workflows/quick-test.yml)
+[![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Python 3.7+](https://img.shields.io/badge/python-3.7+-blue.svg)](https://www.python.org/downloads/)
+[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
+
+A **secure**, **cross-platform** productivity application that combines note-taking and task management with beautiful interfaces for both **terminal** and **Android** platforms.
+
+## ✨ Features
+
+### 🖥️ Terminal Version
+- **🔐 Encryption**: Optional password protection with PBKDF2 + Fernet encryption
+- **📝 Rich Notes**: Full-featured note management with categories and search
+- **✅ Smart Tasks**: Priority levels, due dates, and completion tracking
+- **🎨 Beautiful UI**: Rich terminal interface with ASCII art and colors
+- **📊 Dashboard**: Overview of overdue tasks, today's agenda, and recent notes
+- **🔍 Search**: Find notes and tasks quickly across all content
+- **📈 Statistics**: Streak tracking and productivity insights
+
+### 📱 Android Version (KivyMD)
+- **🎨 Material Design**: Clean, modern mobile interface
+- **📱 Touch Optimized**: Intuitive navigation with bottom tabs
+- **💾 Local Storage**: Secure local data storage on device
+- **🔄 Real-time Sync**: Instant updates across app components
+- **✨ Animations**: Smooth transitions and feedback
+- **📊 Dashboard**: Mobile-optimized stats and overview
 
 ## 🚀 Quick Start
 
-**One-Command Setup:**
-```bash
-python3 setup_complete.py
-```
-
-**Instant Usage:**
-```bash
-# Desktop
-tn --dashboard              # Quick overview
-tn --add-note "My idea"     # Add note
-tn --add-task "Do this"     # Add task
-tn --list-tasks             # List pending tasks
-
-# Android
-cd android_app && python3 main.py    # Test locally
-buildozer android debug              # Build APK
-```
-
-## 🎯 Features
-
-### 🖥️ Desktop Version
-- **🔐 Encrypted Storage**: Optional AES-256 encryption with PBKDF2 key derivation
-- **⚡ Auto-Launch**: Shows dashboard on login with overdue tasks
-- **📝 Notes & Tasks**: Full CRUD operations with categories and priorities
-- **🔍 Advanced Search**: Search across notes and tasks with filters
-- **📊 Smart Dashboard**: Shows overdue tasks, today's tasks, and recent notes
-- **🎨 Beautiful Terminal UI**: Rich formatting with panels and colors
-- **💻 Developer-Friendly**: Code detection, syntax highlighting, and quick CLI commands
-
-### 📱 Android Version
-- **🎨 Material Design**: Beautiful, modern UI following Google's design guidelines
-- **📱 Native Experience**: Built with KivyMD for smooth performance
-- **🔄 Data Sync**: Seamless data synchronization with desktop version
-- **🎮 Gamification**: Daily streaks, achievements, and progress tracking
-- **📊 Visual Dashboard**: Stats, progress bars, and quick actions
-- **🌙 Dark Theme**: Easy on the eyes for long sessions
-- **⚡ Offline-First**: Works completely offline with local storage
-
-### 🔧 Development Features
-- **🚀 CI/CD Pipeline**: Automated testing and APK building with GitHub Actions
-- **🧪 Comprehensive Tests**: Unit tests for all core functionality
-- **📦 Easy Deployment**: One-command setup for development environment
-- **🔒 Security Scanning**: Automated vulnerability checks
-- **📱 Multi-Platform**: Desktop (Linux/Mac/Windows) and Android support
-
-## 📋 What's Included
-
-### Core Applications
-- **`turbo_notes.py`** - Desktop terminal application
-- **`android_app/main.py`** - Android mobile application
-- **`setup_complete.py`** - One-command setup for everything
-
-### Development Tools
-- **`.github/workflows/`** - CI/CD pipelines for automated builds
-- **`android_app/tests/`** - Comprehensive test suite
-- **`run_desktop.sh`** - Quick desktop launcher
-- **`run_android.sh`** - Android development helper
-
-### Documentation
-- **`README.md`** - This comprehensive guide
-- **`android_app/README.md`** - Android-specific documentation
-- **`requirements.txt`** - Python dependencies
-
-## 🛠️ Installation
-
 ### Prerequisites
-- **Python 3.7+** (required)
-- **Git** (for cloning)
-- **Linux/Mac/Windows** (desktop)
-- **Android SDK** (for Android development)
+- Python 3.10+ 
+- Git
 
-### Option 1: Complete Setup (Recommended)
+### 📥 Installation
+
+#### For Terminal Use:
 ```bash
-# Clone the repository
-git clone https://github.com/yourusername/Turbo-notes.git
+git clone https://github.com/rijul-kansal/Turbo-notes.git
 cd Turbo-notes
-
-# Run complete setup (installs everything)
-python3 setup_complete.py
+pip install -r requirements.txt
+python turbo_notes.py
 ```
 
-### Option 2: Desktop Only
+#### For Android Development:
 ```bash
-# Install dependencies
-pip3 install -r requirements.txt
-
-# Run setup
-python3 setup.py
-
-# Start using
-python3 turbo_notes.py
-```
-
-### Option 3: Android Development
-```bash
-# Install Android dependencies
-pip3 install kivy kivymd buildozer
-
-# Setup Android environment
 cd android_app
-buildozer init
+pip install -r requirements.txt
+python main.py  # Run on desktop first
+```
 
-# Build APK
+#### Build Android APK:
+```bash
+cd android_app
+pip install buildozer
 buildozer android debug
 ```
 
-## 📱 Usage Examples
+## 🎯 Usage
 
-### Desktop Terminal Interface
+### Terminal Commands
 ```bash
-# Interactive mode
-tn
+# Interactive mode (recommended)
+python turbo_notes.py
 
 # Quick commands
-tn --dashboard                    # Show overview
-tn --add-note "Meeting notes"     # Add note
-tn --add-task "Review PR"         # Add task
-tn --list-tasks                   # List pending tasks
-tn --help                         # Show all options
-
-# Advanced usage
-tn --add-note "def hello():\n    print('world')"  # Code notes
+python turbo_notes.py --add-note "Meeting notes from today"
+python turbo_notes.py --add-task "Finish project documentation"
+python turbo_notes.py --list-tasks
+python turbo_notes.py --dashboard
 ```
 
-### Android Mobile App
-- **Dashboard**: Overview with stats, streaks, and quick actions
-- **Notes**: Create, edit, view, and delete notes with categories
-- **Tasks**: Full task management with priorities and completion
-- **Search**: Find notes and tasks quickly
-- **Gamification**: Daily streaks and achievements
+### Android App
+1. **Dashboard Tab**: View stats, overdue tasks, and recent notes
+2. **Notes Tab**: Create, view, and manage notes with categories
+3. **Tasks Tab**: Add tasks, set priorities, and mark complete
 
-## 🎨 Screenshots
+## 🏗️ CI/CD Pipeline
 
-### Desktop Terminal
+Our automated pipeline includes:
+
+### 🔍 **Code Quality** (Every Push)
+- **Black** formatting validation
+- **isort** import sorting 
+- **flake8** linting
+- **Bandit** security scanning
+- **Safety** vulnerability checks
+- **Pylint** code quality analysis
+
+### 🧪 **Testing** (Multi-Platform)
+- **Cross-platform testing** (Ubuntu, Windows, macOS)
+- **Python version matrix** (3.10, 3.11, 3.12)
+- **Integration tests** with pytest
+- **Code coverage** reporting
+- **Basic functionality validation**
+
+### 📱 **Android Build** (Master Branch)
+- **Automated APK generation**
+- **Build artifact storage** (30 days)
+- **Release automation**
+
+### 📬 **Notifications**
+- **Slack integration** for build failures (optional)
+- **GitHub status checks**
+- **Automated releases** with APK downloads
+
+## 📊 Project Structure
+
 ```
-🚀 Turbo Notes Dashboard
-========================
-
-📝 5 Notes • ✅ 3 Tasks
-
-⚠️  OVERDUE TASKS:
-┌─ Task #1 - High Priority ────────────────────────────────────┐
-│ Fix critical bug                                             │
-│ The login system is broken                                   │
-│ Due: 2024-01-15                                             │
-└──────────────────────────────────────────────────────────────┘
-
-📄 RECENT NOTES:
-┌─ Note #3 ────────────────────────────────────────────────────┐
-│ Code Review Notes                                            │
-│                                                              │
-│ def process_data(data):                                      │
-│     return [x for x in data if x.is_valid()]               │
-└──────────────────────────────────────────────────────────────┘
+Turbo-notes/
+├── .github/
+│   └── workflows/           # CI/CD pipelines
+│       ├── ci.yml          # Main CI/CD pipeline
+│       └── quick-test.yml  # Fast validation
+├── android_app/
+│   ├── main.py             # Android app (KivyMD)
+│   ├── buildozer.spec      # Android build config
+│   ├── requirements.txt    # Android dependencies
+│   └── tests/              # Android app tests
+├── turbo_notes.py          # Terminal application
+├── requirements.txt        # Core dependencies
+└── README.md              # This file
 ```
-
-### Android Mobile
-[Screenshots of the Android app showing Material Design interface]
 
 ## 🔧 Development
 
-### Project Structure
-```
-Turbo-notes/
-├── turbo_notes.py              # Desktop application
-├── setup_complete.py           # Complete setup script
-├── requirements.txt            # Python dependencies
-├── android_app/                # Android application
-│   ├── main.py                 # Android app code
-│   ├── buildozer.spec          # Android build config
-│   ├── requirements.txt        # Android dependencies
-│   ├── README.md              # Android documentation
-│   └── tests/                 # Test suite
-├── .github/workflows/          # CI/CD pipelines
-├── run_desktop.sh             # Desktop launcher
-├── run_android.sh             # Android dev helper
-└── README.md                  # This file
-```
-
-### Development Workflow
-1. **Make Changes**: Edit `turbo_notes.py` or `android_app/main.py`
-2. **Test Locally**: Run tests with `pytest android_app/tests/`
-3. **Build Android**: Use `buildozer android debug`
-4. **Push Changes**: GitHub Actions will build and test automatically
-5. **Release**: Create GitHub release to trigger production builds
-
 ### Running Tests
 ```bash
-# Run all tests
-pytest android_app/tests/
+# All tests
+pytest
 
-# Run specific test
-pytest android_app/tests/test_data_manager.py
+# With coverage
+pytest --cov=turbo_notes --cov-report=html
 
-# Run with coverage
-pytest android_app/tests/ --cov=android_app --cov-report=html
+# Specific test file
+pytest android_app/tests/test_terminal_integration.py -v
 ```
 
-### Building Android APK
+### Code Quality
 ```bash
-# Debug build
-cd android_app
-buildozer android debug
+# Format code
+black turbo_notes.py android_app/main.py
 
-# Release build (requires signing)
-buildozer android release
+# Sort imports  
+isort turbo_notes.py android_app/main.py
 
-# Deploy to device
-buildozer android deploy run
+# Lint
+flake8 turbo_notes.py android_app/main.py --max-line-length=100
+
+# Security check
+bandit -r turbo_notes.py android_app/main.py
 ```
 
-## 🔐 Security
+## 🛠️ Configuration
 
-### Desktop Version
-- **Optional Encryption**: AES-256 with PBKDF2 key derivation (100,000 iterations)
-- **Secure Storage**: Master password stored in system keyring
-- **Local Data**: Everything stays on your computer
-- **No Tracking**: No analytics or data collection
+### Terminal App Settings
+- **Password Protection**: Enable/disable encryption
+- **Categories**: Customize note categories
+- **Export**: JSON export functionality
+- **Statistics**: Usage tracking and streaks
 
-### Android Version
-- **Local Storage**: All data stored locally on device
-- **No Permissions**: Minimal permissions required
-- **Offline-First**: No internet connection needed
-- **Open Source**: Full source code available for audit
+### Android App Settings
+- **Theme**: Dark/Light mode support
+- **Notifications**: Task reminder system
+- **Sync**: Future cloud sync capability
+- **Code Highlighting**: Syntax highlighting for code notes
 
-## 🚀 CI/CD Pipeline
+## 📱 Android Emulator Testing
 
-### Automated Builds
-- **On Push**: Runs tests and builds debug APK
-- **On PR**: Full testing and security scanning
-- **On Release**: Builds signed APK and deploys to Play Store
+To test on Android emulator:
 
-### GitHub Actions Features
-- **Multi-stage Pipeline**: Testing → Building → Security → Deployment
-- **Caching**: Faster builds with dependency caching
-- **Notifications**: Slack integration for build status
-- **Security Scanning**: Automated vulnerability checks
-- **Performance Testing**: APK size limits and analysis
-
-## 📚 API Reference
-
-### Desktop CLI
-```bash
-tn [OPTIONS]
-
-Options:
-  -n, --add-note TEXT     Add a quick note
-  -t, --add-task TEXT     Add a quick task
-  -l, --list-tasks        List pending tasks
-  -d, --dashboard         Show dashboard and exit
-  --help                  Show this message and exit
-```
-
-### Python API
-```python
-from turbo_notes import TurboNotes
-
-app = TurboNotes()
-app.add_note("Title", "Content")
-app.add_task("Task", "Description", "High")
-app.complete_task(1)
-```
-
-## 🎯 Roadmap
-
-### Version 1.1
-- [ ] Cloud sync between desktop and Android
-- [ ] Markdown rendering and editing
-- [ ] Voice notes for Android
-- [ ] Widget support for Android
-- [ ] Backup and restore functionality
-
-### Version 1.2
-- [ ] Collaboration features
-- [ ] Advanced search with filters
-- [ ] Export to various formats (PDF, HTML, etc.)
-- [ ] Integration with development tools (Git, Jira)
-- [ ] Plugin system for extensions
-
-### Version 2.0
-- [ ] AI-powered features (smart categorization, suggestions)
-- [ ] Team collaboration and sharing
-- [ ] Advanced analytics and insights
-- [ ] Web interface
-- [ ] iOS version
+1. **Start Emulator**: `emulator -avd your_avd_name`
+2. **Build APK**: `cd android_app && buildozer android debug`
+3. **Install**: `adb install bin/*.apk`
 
 ## 🤝 Contributing
 
-We welcome contributions! Here's how to get started:
+1. Fork the repository
+2. Create feature branch: `git checkout -b feature/amazing-feature`
+3. Make changes and test: `pytest`
+4. Commit: `git commit -m 'Add amazing feature'`
+5. Push: `git push origin feature/amazing-feature`
+6. Create Pull Request
 
-1. **Fork the repository**
-2. **Create a feature branch**: `git checkout -b feature/amazing-feature`
-3. **Make your changes** and add tests
-4. **Run tests**: `pytest android_app/tests/`
-5. **Commit changes**: `git commit -m 'Add amazing feature'`
-6. **Push to branch**: `git push origin feature/amazing-feature`
-7. **Open a Pull Request**
+## 📋 Roadmap
 
-### Development Setup
-```bash
-# Clone your fork
-git clone https://github.com/yourusername/Turbo-notes.git
-cd Turbo-notes
-
-# Install development dependencies
-python3 setup_complete.py
-
-# Run tests
-pytest android_app/tests/
-
-# Start developing!
-```
+- [ ] **Cloud Sync**: Cross-device synchronization
+- [ ] **Web Version**: Browser-based interface
+- [ ] **Plugins**: Extension system
+- [ ] **Themes**: Customizable UI themes
+- [ ] **Collaboration**: Shared notes and tasks
+- [ ] **Advanced Search**: Full-text search with filters
+- [ ] **Backup/Restore**: Automated backup system
+- [ ] **Voice Notes**: Audio note recording
 
 ## 📄 License
 
@@ -348,23 +201,22 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ## 🙏 Acknowledgments
 
 - **Rich** - Beautiful terminal formatting
-- **KivyMD** - Material Design for Android
-- **Buildozer** - Android packaging
-- **GitHub Actions** - CI/CD pipeline
-- **Contributors** - Everyone who helped build this
+- **KivyMD** - Material Design for mobile
+- **Cryptography** - Secure encryption
+- **GitHub Actions** - Automated CI/CD
 
 ## 📞 Support
 
-- **Issues**: [GitHub Issues](https://github.com/yourusername/Turbo-notes/issues)
-- **Discussions**: [GitHub Discussions](https://github.com/yourusername/Turbo-notes/discussions)
-- **Email**: support@turbo-notes.dev
-
-## 🌟 Star History
-
-[![Star History Chart](https://api.star-history.com/svg?repos=yourusername/Turbo-notes&type=Date)](https://star-history.com/#yourusername/Turbo-notes&Date)
+- **Issues**: [GitHub Issues](https://github.com/rijul-kansal/Turbo-notes/issues)
+- **Discussions**: [GitHub Discussions](https://github.com/rijul-kansal/Turbo-notes/discussions)
+- **Email**: [Create an issue for support](https://github.com/rijul-kansal/Turbo-notes/issues/new)
 
 ---
 
-**Built with ❤️ by developers, for developers.**
+<div align="center">
 
-*Start your productivity journey today with Turbo Notes!* 
+**Built with ❤️ by [Rijul Kansal](https://github.com/rijul-kansal)**
+
+⭐ **Star this repo if you find it useful!** ⭐
+
+</div> 
