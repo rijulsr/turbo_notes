@@ -173,42 +173,57 @@ jobs:
         cd android_app
         python -c "
         import sys
+        import tempfile
+        import shutil
+        from pathlib import Path
         from data_manager import DataManager
         
         print('Testing DataManager core functionality...')
-        dm = DataManager()
         
-        # Test note operations
-        note = dm.add_note('Test Note', 'Test Content', 'Work')
-        assert note['title'] == 'Test Note'
-        assert note['category'] == 'Work'
-        assert note['is_code'] == False
-        print('[PASS] Note creation and properties')
+        # Create temporary directory for testing
+        temp_dir = tempfile.mkdtemp()
         
-        # Test task operations  
-        task = dm.add_task('Test Task', 'Test Description', 'High', category='Personal')
-        assert task['title'] == 'Test Task'
-        assert task['priority'] == 'High'
-        assert task['completed'] == False
-        print('[PASS] Task creation and properties')
-        
-        # Test data persistence
-        dm.save_data()
-        print('[PASS] Data persistence')
-        
-        # Test code detection
-        code_note = dm.add_note('Python Code', 'def hello():\n    print(\"Hello World\")')
-        assert code_note['is_code'] == True
-        print('[PASS] Code detection')
-        
-        # Test task completion
-        success = dm.complete_task(task['id'])
-        assert success == True
-        print('[PASS] Task completion')
-        
-        print('[SUCCESS] All Android app core tests passed!')
-        print(f'[INFO] Total notes: {len(dm.data[\"notes\"])}')
-        print(f'[INFO] Total tasks: {len(dm.data[\"tasks\"])}')
+        try:
+            dm = DataManager()
+            # Override data directory to use temp directory
+            dm.data_dir = Path(temp_dir)
+            dm.data_file = dm.data_dir / 'test_data.json'
+            
+            # Test note operations
+            note = dm.add_note('Test Note', 'Test Content', 'Work')
+            assert note['title'] == 'Test Note'
+            assert note['category'] == 'Work'
+            assert note['is_code'] == False
+            print('[PASS] Note creation and properties')
+            
+            # Test task operations  
+            task = dm.add_task('Test Task', 'Test Description', 'High', category='Personal')
+            assert task['title'] == 'Test Task'
+            assert task['priority'] == 'High'
+            assert task['completed'] == False
+            print('[PASS] Task creation and properties')
+            
+            # Test data persistence
+            dm.save_data()
+            print('[PASS] Data persistence')
+            
+            # Test code detection
+            code_note = dm.add_note('Python Code', 'def hello():\n    print(\"Hello World\")')
+            assert code_note['is_code'] == True
+            print('[PASS] Code detection')
+            
+            # Test task completion
+            success = dm.complete_task(task['id'])
+            assert success == True
+            print('[PASS] Task completion')
+            
+            print('[SUCCESS] All Android app core tests passed!')
+            print(f'[INFO] Total notes: {len(dm.data[\"notes\"])}')
+            print(f'[INFO] Total tasks: {len(dm.data[\"tasks\"])}')
+            
+        finally:
+            # Clean up temp directory
+            shutil.rmtree(temp_dir, ignore_errors=True)
         "
         
     - name: 🧪 Run Android App Unit Tests
