@@ -1,4 +1,5 @@
 click>=8.0.2
 cryptography>=45.0.5
 keyring>=24.0.0
+keyrings.alt>=5.0.0
 rich>=13.0.0 

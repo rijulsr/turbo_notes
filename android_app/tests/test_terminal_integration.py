@@ -100,14 +100,18 @@ class TestTurboNotesIntegration:
         assert len(today_tasks) == 1
         assert today_tasks[0]["title"] == "Today Task"
         
-    def test_data_persistence(self):
+    @patch('keyring.get_password')
+    @patch('keyring.set_password')
+    def test_data_persistence(self, mock_set_password, mock_get_password):
         """Test data saving and loading"""
+        mock_get_password.return_value = None  # No password set
+        
         # Add some data
         self.app.add_note("Persistent Note", "This should persist")
         self.app.add_task("Persistent Task", "This should also persist")
         
-        # Save data
-        self.app.save_data()
+        # Save data (unencrypted since no password)
+        self.app.save_data_unencrypted()
         
         # Create new app instance and load data
         new_app = TurboNotes()
@@ -124,8 +128,9 @@ class TestTurboNotesIntegration:
         assert new_app.data["tasks"][0]["title"] == "Persistent Task"
         
     @patch('keyring.get_password')
-    @patch('keyring.set_password')
-    def test_encryption_setup_no_password(self, mock_set_password, mock_get_password):
+    @patch('keyring.set_password')  
+    @patch('turbo_notes.TurboNotes.save_data')
+    def test_encryption_setup_no_password(self, mock_save_data, mock_set_password, mock_get_password):
         """Test encryption setup when user chooses no password"""
         mock_get_password.return_value = None
         
@@ -178,8 +183,11 @@ class TestDataIntegrity:
         import shutil
         shutil.rmtree(self.temp_dir, ignore_errors=True)
         
-    def test_empty_data_handling(self):
+    @patch('keyring.get_password')
+    def test_empty_data_handling(self, mock_get_password):
         """Test handling of empty or missing data"""
+        mock_get_password.return_value = None  # No password set
+        
         # Test with no existing data file
         success = self.app.load_data()
         assert success

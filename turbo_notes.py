@@ -35,6 +35,7 @@ class TurboNotes:
         self.cipher_suite = None
         self.data = {
             "notes": [],
+            "tasks": [],
             "categories": ["Personal", "Work", "Ideas"],
             "last_accessed": None,
             "password_enabled": None,
