@@ -49,7 +49,11 @@ jobs:
         
     - name: 🛡️ Vulnerability Check (Safety)
       run: |
-        safety check --ignore 70612
+        # Install older version of safety that works well in CI
+        pip install safety==2.3.5
+        
+        # Check our core dependencies for vulnerabilities
+        safety check -r requirements.txt --ignore 70612
         
     - name: 📊 Code Quality (Pylint)
       run: |
