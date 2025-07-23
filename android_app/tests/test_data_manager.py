@@ -15,7 +15,7 @@ import sys
 import os
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
 
-from main import DataManager
+from data_manager import DataManager
 
 
 class TestDataManager(unittest.TestCase):
@@ -283,7 +283,7 @@ class TestDataManager(unittest.TestCase):
         # Should return False but not crash
         self.assertFalse(result)
         
-    @patch('main.DataManager.save_data')
+    @patch('data_manager.DataManager.save_data')
     def test_save_data_called_on_operations(self, mock_save):
         """Test that save_data is called after operations"""
         self.data_manager.add_note("Test", "Content")
