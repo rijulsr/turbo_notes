@@ -21,7 +21,6 @@ from rich.panel import Panel
 from rich.prompt import Prompt
 
 
-
 class TurboNotes:
     def __init__(self):
         self.console = Console()
@@ -78,7 +77,8 @@ class TurboNotes:
                         return True  # Successfully loaded unencrypted data, no need for password
                     except (json.JSONDecodeError, Exception) as e:
                         self.console.print(
-                            f"[yellow]Warning: Could not load unencrypted data: {e}. Treating as first run.[/yellow]"
+                            f"[yellow]Warning: Could not load unencrypted data: {e}. "
+                            f"Treating as first run.[/yellow]"
                         )
                 # If no data or load failed, proceed to prompt
                 self.console.print("\n[bold blue]Welcome to Turbo Notes![/bold blue]")
@@ -312,7 +312,9 @@ class TurboNotes:
             self.console.print("[bold red]⚠️  OVERDUE TASKS:[/bold red]")
             for task in overdue_tasks[:3]:
                 task_panel = Panel(
-                    f"[bold]{task['title']}[/bold]\n{task.get('description', '')}\n[red]Due: {task.get('due_date', 'No due date')[:10]}[/red]",
+                    f"[bold]{task['title']}[/bold]\n"
+                    f"{task.get('description', '')}\n"
+                    f"[red]Due: {task.get('due_date', 'No due date')[:10]}[/red]",
                     title=f"Task #{task['id']} - {task['priority']} Priority",
                     border_style="red",
                     padding=(0, 1),
@@ -326,7 +328,9 @@ class TurboNotes:
             self.console.print("[bold yellow]📅 DUE TODAY:[/bold yellow]")
             for task in today_tasks[:3]:
                 task_panel = Panel(
-                    f"[bold]{task['title']}[/bold]\n{task.get('description', '')}\n[yellow]Due: Today[/yellow]",
+                    f"[bold]{task['title']}[/bold]\n"
+                    f"{task.get('description', '')}\n"
+                    f"[yellow]Due: Today[/yellow]",
                     title=f"Task #{task['id']} - {task['priority']} Priority",
                     border_style="yellow",
                     padding=(0, 1),
@@ -534,7 +538,10 @@ class TurboNotes:
                 status_color = {"High": "red", "Medium": "yellow", "Low": "green"}.get(
                     task["priority"], "white"
                 )
-                panel_content = f"[bold]{task['title']}[/bold]\n\n{task['description']}\n\n[{status_color}]Priority: {task['priority']}[/{status_color}]"
+                panel_content = (
+                    f"[bold]{task['title']}[/bold]\n\n{task['description']}\n\n"
+                    f"[{status_color}]Priority: {task['priority']}[/{status_color}]"
+                )
                 if task.get("due_date"):
                     panel_content += f"\n[blue]Due: {task['due_date'][:10]}[/blue]"
 
