@@ -4,6 +4,7 @@ Turbo Notes Android - Lightweight mobile version
 Built with Kivy for cross-platform compatibility
 """
 
+from data_manager import DataManager
 from kivy.clock import Clock
 from kivy.metrics import dp
 from kivymd.app import MDApp
@@ -21,9 +22,6 @@ from kivymd.uix.scrollview import MDScrollView
 from kivymd.uix.selectioncontrol import MDCheckbox
 from kivymd.uix.snackbar import Snackbar
 from kivymd.uix.textfield import MDTextField
-
-from data_manager import DataManager
-
 
 # UI Screen Classes start here
 
