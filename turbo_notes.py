@@ -238,7 +238,7 @@ class TurboNotes:
                     due_date = datetime.fromisoformat(task["due_date"]).date()
                     if due_date < today:
                         overdue.append(task)
-                except Exception:
+                except (ValueError, TypeError, AttributeError):
                     continue
 
         return overdue
@@ -257,7 +257,7 @@ class TurboNotes:
                     due_date = datetime.fromisoformat(task["due_date"]).date()
                     if due_date == today:
                         today_tasks.append(task)
-                except Exception:
+                except (ValueError, TypeError, AttributeError):
                     continue
 
         return today_tasks
