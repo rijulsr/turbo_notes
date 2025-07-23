@@ -96,12 +96,12 @@ jobs:
         sys.path.append('.')
         from turbo_notes import TurboNotes
         app = TurboNotes()
-        print('✅ Terminal app imports successfully')
+        print('[PASS] Terminal app imports successfully')
         app.add_note('Test Note', 'This is a test note')
-        print('✅ Note addition works')
+        print('[PASS] Note addition works')
         app.add_task('Test Task', 'This is a test task')
-        print('✅ Task addition works')
-        print('🎉 All basic tests passed!')
+        print('[PASS] Task addition works')
+        print('[SUCCESS] All basic tests passed!')
         "
         
     - name: 📊 Upload Coverage
@@ -142,14 +142,14 @@ jobs:
         dm = DataManager()
         note = dm.add_note('Test Note', 'Test Content')
         task = dm.add_task('Test Task', 'Test Description')
-        print(f'✅ Note added: {note[\"title\"]}')
-        print(f'✅ Task added: {task[\"title\"]}')
-        print('✅ DataManager works correctly')
+        print(f'[PASS] Note added: {note[\"title\"]}')
+        print(f'[PASS] Task added: {task[\"title\"]}')
+        print('[PASS] DataManager works correctly')
         
         print('Testing App initialization...')
         app = TurboNotesApp()
-        print('✅ Android app initializes successfully')
-        print('🎉 Android app tests passed!')
+        print('[PASS] Android app initializes successfully')
+        print('[SUCCESS] Android app tests passed!')
         "
 
   # ==================== ANDROID BUILD ====================
