@@ -12,8 +12,7 @@ from typing import Dict, List
 from kivy.clock import Clock
 from kivy.metrics import dp
 from kivymd.app import MDApp
-from kivymd.uix.bottomnavigation import (MDBottomNavigation,
-                                         MDBottomNavigationItem)
+from kivymd.uix.bottomnavigation import MDBottomNavigation, MDBottomNavigationItem
 from kivymd.uix.boxlayout import MDBoxLayout
 from kivymd.uix.button import MDFlatButton, MDIconButton, MDRaisedButton
 from kivymd.uix.card import MDCard
