@@ -163,32 +163,58 @@ jobs:
       run: |
         python -m pip install --upgrade pip
         pip install pytest pytest-mock
-        pip install -r android_app/requirements.txt
+        # Install core dependencies without UI components for CI testing
+        pip install pillow pygments plyer python-dateutil requests
+        pip install cryptography>=45.0.5
+        # Skip Kivy/KivyMD installation in CI - test only DataManager
         
-    - name: 🧪 Test Android App Components
-      env:
-        DISPLAY: :99
+    - name: 🧪 Test Android App Core Logic
       run: |
         cd android_app
         python -c "
-        import os
-        os.environ['KIVY_GL_BACKEND'] = 'gl'
-        
         import sys
         from data_manager import DataManager
         
-        print('Testing DataManager...')
+        print('Testing DataManager core functionality...')
         dm = DataManager()
-        note = dm.add_note('Test Note', 'Test Content')
-        task = dm.add_task('Test Task', 'Test Description')
-        print(f'[PASS] Note added: {note[\"title\"]}')
-        print(f'[PASS] Task added: {task[\"title\"]}')
-        print('[PASS] DataManager works correctly')
         
-        print('Testing App initialization (UI components skipped in CI)...')
-        print('[PASS] Android app components work correctly')
-        print('[SUCCESS] Android app tests passed!')
+        # Test note operations
+        note = dm.add_note('Test Note', 'Test Content', 'Work')
+        assert note['title'] == 'Test Note'
+        assert note['category'] == 'Work'
+        assert note['is_code'] == False
+        print('[PASS] Note creation and properties')
+        
+        # Test task operations  
+        task = dm.add_task('Test Task', 'Test Description', 'High', category='Personal')
+        assert task['title'] == 'Test Task'
+        assert task['priority'] == 'High'
+        assert task['completed'] == False
+        print('[PASS] Task creation and properties')
+        
+        # Test data persistence
+        dm.save_data()
+        print('[PASS] Data persistence')
+        
+        # Test code detection
+        code_note = dm.add_note('Python Code', 'def hello():\n    print(\"Hello World\")')
+        assert code_note['is_code'] == True
+        print('[PASS] Code detection')
+        
+        # Test task completion
+        success = dm.complete_task(task['id'])
+        assert success == True
+        print('[PASS] Task completion')
+        
+        print('[SUCCESS] All Android app core tests passed!')
+        print(f'[INFO] Total notes: {len(dm.data[\"notes\"])}')
+        print(f'[INFO] Total tasks: {len(dm.data[\"tasks\"])}')
         "
+        
+    - name: 🧪 Run Android App Unit Tests
+      run: |
+        cd android_app
+        python -m pytest tests/test_data_manager.py -v --tb=short
 
   # ==================== ANDROID BUILD ====================
   build-android:
