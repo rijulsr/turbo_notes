@@ -42,9 +42,12 @@ jobs:
           
     - name: Install dependencies
       run: |
-        cd android_app
         python -m pip install --upgrade pip
+        # Install main project dependencies (includes click, rich, etc.)
         pip install -r requirements.txt
+        # Install Android-specific dependencies
+        pip install -r android_app/requirements.txt
+        # Install test dependencies
         pip install pytest pytest-cov flake8
         
     - name: Lint with flake8
@@ -56,6 +59,8 @@ jobs:
     - name: Test with pytest
       run: |
         cd android_app
+        # Set PYTHONPATH to include parent directory for turbo_notes import
+        export PYTHONPATH="$PYTHONPATH:../"
         pytest tests/ --cov=. --cov-report=xml --cov-report=html
         
     - name: Upload coverage to Codecov
