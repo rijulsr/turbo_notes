@@ -205,7 +205,7 @@ jobs:
         fi
         
     - name: Upload debug APK
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: debug-apk
         path: android_app/bin/*.apk
@@ -374,7 +374,7 @@ jobs:
         fi
         
     - name: Upload release APK
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: release-apk
         path: |
@@ -424,7 +424,7 @@ jobs:
       uses: actions/checkout@v4
       
     - name: Download release APK
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
         name: release-apk
         path: ./apk/
@@ -476,7 +476,7 @@ jobs:
       uses: actions/checkout@v4
       
     - name: Download debug APK
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
         name: debug-apk
         path: ./apk/
@@ -500,7 +500,7 @@ jobs:
         fi
         
     - name: Upload APK analysis
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: apk-analysis
         path: apk-analysis.txt 
