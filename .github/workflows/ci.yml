@@ -302,6 +302,9 @@ jobs:
         export ACLOCAL_PATH="/usr/share/aclocal:${ACLOCAL_PATH}"
         export PKG_CONFIG_PATH="/usr/lib/pkgconfig:/usr/share/pkgconfig:${PKG_CONFIG_PATH}"
         
+        # Force aclocal to include libtool macros
+        echo "ACLOCAL=aclocal -I /usr/share/aclocal" >> $GITHUB_ENV
+        
         # Update autotools if libffi needs it
         echo "Preparing autotools environment..."
         autoreconf --version
