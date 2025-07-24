@@ -58,22 +58,22 @@ android.copy_libs = 1
 android.archs = arm64-v8a, armeabi-v7a
 
 # (int) Target Android API, should be as high as possible.
-android.api = 30
+android.api = 33
 
 # (int) Minimum API your APK will support.
 android.minapi = 21
 
-# (str) Android NDK version to use
-android.ndk = 21b
+# (str) Android NDK version to use (25+ required, using system NDK)
+# android.ndk = 25b
 
 # (int) Android SDK version to use
-android.sdk = 30
+android.sdk = 33
 
 # (str) Android SDK directory (if empty, it will be automatically downloaded.)
 #android.sdk_path = 
 
 # (str) Android NDK directory (if empty, it will be automatically downloaded.)
-#android.ndk_path = 
+#android.ndk_path = /usr/local/lib/android/sdk/ndk-bundle
 
 # (bool) Use --private data storage (True) or --dir public storage (False)
 android.private_storage = True
