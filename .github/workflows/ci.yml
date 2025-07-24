@@ -269,6 +269,8 @@ jobs:
         echo "ANDROID_SDK_ROOT=/usr/local/lib/android/sdk" >> $GITHUB_ENV
         # Use the JAVA_HOME automatically set by setup-java action
         echo "JAVA_HOME=$JAVA_HOME" >> $GITHUB_ENV
+        # Ensure aclocal finds libtool macros
+        echo "ACLOCAL_PATH=/usr/share/aclocal" >> $GITHUB_ENV
         
         # Find the latest NDK version available
         NDK_DIR="/usr/local/lib/android/sdk/ndk"
