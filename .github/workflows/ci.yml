@@ -257,12 +257,40 @@ jobs:
         python -m pip install --upgrade pip
         pip install buildozer cython kivy kivymd
         
-    - name: 🔧 Setup Android SDK  
+    - name: 🔧 Setup Android SDK
       uses: android-actions/setup-android@v3
+      
+    - name: 📋 Accept Android SDK Licenses
+      env:
+        ANDROID_HOME: /usr/local/lib/android/sdk
+      run: |
+        # Set up environment
+        export ANDROID_HOME=/usr/local/lib/android/sdk
+        export ANDROID_SDK_ROOT=/usr/local/lib/android/sdk
+        
+        echo "ANDROID_HOME: $ANDROID_HOME"
+        echo "ANDROID_SDK_ROOT: $ANDROID_SDK_ROOT"
+        
+        # Create license directory if it doesn't exist
+        mkdir -p "$ANDROID_HOME/licenses" || true
+        
+        # Pre-accept all Android SDK licenses with correct hashes
+        echo "24333f8a63b6825ea9c5514f83c2829b004d1fee" > "$ANDROID_HOME/licenses/android-sdk-license"
+        echo "84831b9409646a918e30573bab4c9c91346d8abd" > "$ANDROID_HOME/licenses/android-sdk-preview-license"
+        echo "d975f751698a77b662f1254ddbeed3901e976f5a" > "$ANDROID_HOME/licenses/intel-android-extra-license"
+        echo "601085b94cd77f0b54ff86406957099ebe79c4d6" > "$ANDROID_HOME/licenses/android-googletv-license"
+        echo "33b6a2b64607f11b759f320ef9dff4ae5c47d97a" > "$ANDROID_HOME/licenses/google-gdk-license"
+        
+        # Also try alternative license acceptance method
+        echo "y" | "$ANDROID_HOME/tools/bin/sdkmanager" --licenses > /dev/null 2>&1 || true
+        
+        # Verify licenses were created
+        echo "License files created:"
+        ls -la "$ANDROID_HOME/licenses/" || echo "No licenses directory found"
         
     - name: 🏗️ Build APK
       env:
-        ANDROID_HOME: ${{ env.ANDROID_SDK_ROOT }}
+        ANDROID_HOME: /usr/local/lib/android/sdk
         ANDROID_SDK_ROOT: /usr/local/lib/android/sdk
         JAVA_HOME: /usr/lib/jvm/java-17-openjdk-amd64
       run: |

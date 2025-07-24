@@ -78,6 +78,9 @@ android.sdk = 30
 # (bool) Use --private data storage (True) or --dir public storage (False)
 android.private_storage = True
 
+# (bool) Automatically accept Android SDK license agreements
+android.accept_sdk_license = True
+
 # (str) Android additional aab/apk to add
 #android.add_aars = 
 
