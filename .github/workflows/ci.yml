@@ -322,8 +322,18 @@ jobs:
         # Force buildozer to not download its own NDK
         export P4A_SKIP_NDK_DOWNLOAD=1
         
-        # Build the APK with verbose output
-        buildozer android debug --verbose
+        # Build the APK with verbose output and capture full logs
+        echo "Starting buildozer with full logging..."
+        buildozer android debug --verbose 2>&1 | tee buildozer_full.log
+        
+        # If build fails, show the last 100 lines of detailed logs
+        if [ ${PIPESTATUS[0]} -ne 0 ]; then
+          echo "=== BUILD FAILED - Last 100 lines of buildozer log ==="
+          tail -n 100 buildozer_full.log
+          echo "=== Python-for-Android specific errors ==="
+          grep -i "error\|failed\|exception" buildozer_full.log | tail -n 20
+          exit 1
+        fi
         
         # Verify APK was created
         if [ ! -d "bin" ] || [ -z "$(ls -A bin/*.apk 2>/dev/null)" ]; then

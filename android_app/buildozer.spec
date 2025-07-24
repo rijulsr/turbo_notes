@@ -18,8 +18,8 @@ source.include_exts = py,png,jpg,kv,atlas,json
 # (str) Application versioning (method 1)
 version = 1.0.0
 
-# (list) Application requirements
-requirements = python3,kivy,kivymd,pillow,pygments,plyer,android,pyjnius
+# (list) Application requirements  
+requirements = python3,kivy==2.3.0,kivymd,pillow,pygments,plyer,android,pyjnius
 
 # (str) Presplash of the application
 #presplash.filename = %(source.dir)s/data/presplash.png
@@ -61,10 +61,10 @@ android.archs = arm64-v8a, armeabi-v7a
 android.api = 33
 
 # (int) Minimum API your APK will support.
-android.minapi = 21
+android.minapi = 24
 
 # (str) Android NDK version to use (25+ required, using system NDK)
-# android.ndk = 25b
+android.ndk = 26b
 
 # (int) Android SDK version to use
 android.sdk = 33
