@@ -58,16 +58,16 @@ android.copy_libs = 1
 android.archs = arm64-v8a, armeabi-v7a
 
 # (int) Target Android API, should be as high as possible.
-android.api = 33
+android.api = 30
 
 # (int) Minimum API your APK will support.
 android.minapi = 21
 
 # (str) Android NDK version to use
-android.ndk = 25b
+android.ndk = 21b
 
 # (int) Android SDK version to use
-android.sdk = 33
+android.sdk = 30
 
 # (str) Android SDK directory (if empty, it will be automatically downloaded.)
 #android.sdk_path = 
@@ -85,11 +85,11 @@ android.private_storage = True
 #android.add_libs = 
 
 # (list) Gradle dependencies to add
-android.gradle_dependencies = com.google.android.material:material:1.8.0
+#android.gradle_dependencies = com.google.android.material:material:1.8.0
 
 # (bool) Enable AndroidX support. Enable when 'android.gradle_dependencies'
 # contains an 'androidx' package, or any package from Kotlin source.
-android.enable_androidx = True
+#android.enable_androidx = True
 
 # (str) Bootstrap to use for android builds
 bootstrap = sdl2

@@ -257,14 +257,41 @@ jobs:
         python -m pip install --upgrade pip
         pip install buildozer cython kivy kivymd
         
-    - name: 🔧 Setup Android SDK
+    - name: 🔧 Setup Android SDK  
       uses: android-actions/setup-android@v3
         
     - name: 🏗️ Build APK
+      env:
+        ANDROID_HOME: ${{ env.ANDROID_SDK_ROOT }}
+        ANDROID_SDK_ROOT: /usr/local/lib/android/sdk
+        JAVA_HOME: /usr/lib/jvm/java-17-openjdk-amd64
       run: |
         cd android_app
         echo "Building Android APK..."
-        buildozer android debug || echo "Build failed, continuing anyway"
+        echo "ANDROID_HOME: $ANDROID_HOME"
+        echo "JAVA_HOME: $JAVA_HOME"
+        
+        # Check if buildozer.spec exists
+        if [ ! -f "buildozer.spec" ]; then
+          echo "❌ buildozer.spec not found! Creating a basic one..."
+          buildozer init
+        fi
+        
+        # Clean any previous builds
+        buildozer android clean || true
+        
+        # Build the APK with verbose output
+        buildozer android debug --verbose
+        
+        # Verify APK was created
+        if [ ! -d "bin" ] || [ -z "$(ls -A bin/*.apk 2>/dev/null)" ]; then
+          echo "❌ No APK files found in bin/ directory"
+          ls -la bin/ || echo "bin/ directory doesn't exist"
+          exit 1
+        fi
+        
+        echo "✅ APK build successful!"
+        ls -la bin/
         
     - name: 📤 Upload APK Artifact
       if: success()
