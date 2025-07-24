@@ -149,11 +149,8 @@ jobs:
           echo "ANDROIDNDK=$NDK_DIR/$LATEST_NDK" >> $GITHUB_ENV
           echo "NDK_ROOT=$NDK_DIR/$LATEST_NDK" >> $GITHUB_ENV
           
-          # Force buildozer to use system NDK by updating buildozer.spec
-          cd android_app
-          sed -i "s|#android.ndk_path.*|android.ndk_path = $NDK_DIR/$LATEST_NDK|" buildozer.spec
-          sed -i "s|android.ndk_path.*|android.ndk_path = $NDK_DIR/$LATEST_NDK|" buildozer.spec
-          cd ..
+          # Let buildozer download the recommended NDK 25b instead of using system NDK 28.x
+          echo "Will use buildozer's recommended NDK 25b instead of system NDK $LATEST_NDK"
         else
           echo "⚠️ NDK directory not found at $NDK_DIR"
           echo "Available Android SDK contents:"
@@ -324,8 +321,8 @@ jobs:
         echo "Using Android SDK: $ANDROID_SDK_ROOT"
         echo "JAVA_HOME: $JAVA_HOME"
         
-        # Force buildozer to not download its own NDK
-        export P4A_SKIP_NDK_DOWNLOAD=1
+        # Let buildozer download its recommended NDK 25b (more stable than system 28.x)
+        # export P4A_SKIP_NDK_DOWNLOAD=1
         
         # Set autotools environment variables
         export ACLOCAL_PATH="/usr/share/aclocal:${ACLOCAL_PATH}"

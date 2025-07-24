@@ -18,8 +18,8 @@ source.include_exts = py,png,jpg,kv,atlas,json
 # (str) Application versioning (method 1)
 version = 1.0.0
 
-# (list) Application requirements  
-requirements = python3,kivy==2.3.0,kivymd,pillow,pygments,plyer,android,pyjnius
+# (list) Application requirements (simplified for stability)
+requirements = python3,kivy,pillow,pygments,plyer,android,pyjnius
 
 # (str) Presplash of the application
 #presplash.filename = %(source.dir)s/data/presplash.png
@@ -58,22 +58,22 @@ android.copy_libs = 1
 android.archs = arm64-v8a, armeabi-v7a
 
 # (int) Target Android API, should be as high as possible.
-android.api = 33
+android.api = 30
 
 # (int) Minimum API your APK will support.
-android.minapi = 24
+android.minapi = 21
 
-# (str) Android NDK version to use (25+ required, using system NDK)
-android.ndk = 26b
+# (str) Android NDK version to use (using p4a recommended version)
+android.ndk = 25b
 
 # (int) Android SDK version to use
-android.sdk = 33
+android.sdk = 30
 
 # (str) Android SDK directory (if empty, it will be automatically downloaded.)
-#android.sdk_path = /usr/local/lib/android/sdk
+#android.sdk_path = 
 
 # (str) Android NDK directory (if empty, it will be automatically downloaded.)
-#android.ndk_path = /usr/local/lib/android/sdk/ndk-bundle
+#android.ndk_path =
 
 # (bool) Use --private data storage (True) or --dir public storage (False)
 android.private_storage = True
@@ -94,8 +94,8 @@ android.accept_sdk_license = True
 # contains an 'androidx' package, or any package from Kotlin source.
 #android.enable_androidx = True
 
-# (str) Bootstrap to use for android builds
-bootstrap = sdl2
+# (str) Bootstrap to use for android builds (service_only is more stable)
+bootstrap = service_only
 
 # (str) The directory in which python-for-android should look for your own build recipes (if any)
 #p4a.local_recipes = 
