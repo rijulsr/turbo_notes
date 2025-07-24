@@ -250,12 +250,15 @@ jobs:
     - name: 📱 Setup Android Build Environment
       run: |
         sudo apt-get update
-        sudo apt-get install -y git zip unzip openjdk-17-jdk autoconf libtool pkg-config zlib1g-dev libncurses5-dev libncursesw5-dev libtinfo6 cmake libffi-dev libssl-dev automake build-essential libtool-bin autotools-dev
+        sudo apt-get install -y git zip unzip openjdk-17-jdk autoconf libtool pkg-config zlib1g-dev libncurses5-dev libncursesw5-dev libtinfo6 cmake libffi-dev libssl-dev automake build-essential libtool-bin autotools-dev m4 autoconf-archive gettext
         
     - name: 📦 Install Build Dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install buildozer cython kivy kivymd
+        pip install buildozer==1.5.0 cython kivy kivymd
+        
+        # Try to use a newer python-for-android version
+        pip install --upgrade python-for-android
         
     - name: 🔧 Setup Android SDK  
       uses: android-actions/setup-android@v3
@@ -321,6 +324,15 @@ jobs:
         
         # Force buildozer to not download its own NDK
         export P4A_SKIP_NDK_DOWNLOAD=1
+        
+        # Set autotools environment variables
+        export ACLOCAL_PATH="/usr/share/aclocal:${ACLOCAL_PATH}"
+        export PKG_CONFIG_PATH="/usr/lib/pkgconfig:/usr/share/pkgconfig:${PKG_CONFIG_PATH}"
+        
+        # Update autotools if libffi needs it
+        echo "Preparing autotools environment..."
+        autoreconf --version
+        libtoolize --version
         
         # Build the APK with verbose output and capture full logs
         echo "Starting buildozer with full logging..."

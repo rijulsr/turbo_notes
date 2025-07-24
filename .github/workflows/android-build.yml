@@ -177,6 +177,15 @@ jobs:
         # Force buildozer to not download its own NDK
         export P4A_SKIP_NDK_DOWNLOAD=1
         
+        # Set autotools environment variables
+        export ACLOCAL_PATH="/usr/share/aclocal:${ACLOCAL_PATH}"
+        export PKG_CONFIG_PATH="/usr/lib/pkgconfig:/usr/share/pkgconfig:${PKG_CONFIG_PATH}"
+        
+        # Update autotools if libffi needs it
+        echo "Preparing autotools environment..."
+        autoreconf --version
+        libtoolize --version
+        
         # Build the APK with verbose output and capture full logs
         echo "Starting buildozer with full logging..."
         buildozer android debug --verbose 2>&1 | tee buildozer_full.log
@@ -241,7 +250,7 @@ jobs:
           git zip unzip openjdk-17-jdk python3-pip autoconf libtool pkg-config \
           zlib1g-dev libncurses5-dev libncursesw5-dev libtinfo6 cmake \
           libffi-dev libssl-dev build-essential libltdl-dev \
-          ccache automake libtool-bin autotools-dev
+          ccache automake libtool-bin autotools-dev m4 autoconf-archive gettext
           
     - name: Install Python dependencies
       run: |
@@ -312,6 +321,15 @@ jobs:
         
         # Force buildozer to not download its own NDK
         export P4A_SKIP_NDK_DOWNLOAD=1
+        
+        # Set autotools environment variables
+        export ACLOCAL_PATH="/usr/share/aclocal:${ACLOCAL_PATH}"
+        export PKG_CONFIG_PATH="/usr/lib/pkgconfig:/usr/share/pkgconfig:${PKG_CONFIG_PATH}"
+        
+        # Update autotools if libffi needs it
+        echo "Preparing autotools environment..."
+        autoreconf --version
+        libtoolize --version
         
         if [ -f "my-release-key.keystore" ]; then
           echo "Building signed release APK..."
