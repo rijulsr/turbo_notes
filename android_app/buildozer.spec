@@ -19,7 +19,7 @@ source.include_exts = py,png,jpg,kv,atlas,json
 version = 1.0.0
 
 # (list) Application requirements (GUI app needs KivyMD)
-requirements = python3,kivy,kivymd,pillow,pygments,plyer,android,pyjnius
+requirements = python3,kivy==2.2.1,kivymd==1.1.1,pillow,pygments,plyer,android,pyjnius
 
 # (str) Presplash of the application
 #presplash.filename = %(source.dir)s/data/presplash.png
@@ -54,26 +54,26 @@ android.logcat_filters = *:S python:D
 # (bool) Copy library instead of making a libpymodules.so
 android.copy_libs = 1
 
-# (str) The Android arch to build for, choices: armeabi-v7a, arm64-v8a, x86, x86_64
+# (str) The Android arch to build for
 android.archs = arm64-v8a, armeabi-v7a
 
-# (int) Target Android API, should be as high as possible.
-android.api = 30
+# (int) Target Android API
+android.api = 33
 
 # (int) Minimum API your APK will support.
 android.minapi = 21
 
-# (str) Android NDK version to use (p4a requires 25+)
-android.ndk = 25b
+# (str) Android NDK version to use
+android.ndk = 25c
 
 # (int) Android SDK version to use
 android.sdk = 30
 
-# (str) Android SDK directory (if empty, it will be automatically downloaded.)
-#android.sdk_path =
+# (str) Android SDK directory (leave empty)
+#android.sdk_path = 
 
-# (str) Android NDK directory (if empty, it will be automatically downloaded.)
-#android.ndk_path =
+# (str) Android NDK directory (leave empty)
+#android.ndk_path = 
 
 # (bool) Use --private data storage (True) or --dir public storage (False)
 android.private_storage = True
@@ -94,7 +94,7 @@ android.accept_sdk_license = True
 # contains an 'androidx' package, or any package from Kotlin source.
 #android.enable_androidx = True
 
-# (str) Bootstrap to use for android builds (GUI apps need sdl2)
+# (str) Bootstrap to use for android builds
 bootstrap = sdl2
 
 # (str) The directory in which python-for-android should look for your own build recipes (if any)

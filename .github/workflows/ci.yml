@@ -267,33 +267,8 @@ jobs:
         echo "Setting up Android environment variables..."
         echo "ANDROID_HOME=/usr/local/lib/android/sdk" >> $GITHUB_ENV
         echo "ANDROID_SDK_ROOT=/usr/local/lib/android/sdk" >> $GITHUB_ENV
-        # Use the JAVA_HOME automatically set by setup-java action
         echo "JAVA_HOME=$JAVA_HOME" >> $GITHUB_ENV
-        # Ensure aclocal finds libtool macros
         echo "ACLOCAL_PATH=/usr/share/aclocal" >> $GITHUB_ENV
-        
-        # Find the latest NDK version available
-        NDK_DIR="/usr/local/lib/android/sdk/ndk"
-        if [ -d "$NDK_DIR" ]; then
-          echo "Available NDK versions:"
-          ls -la "$NDK_DIR/"
-          
-          # Get the latest NDK version (highest version number)
-          LATEST_NDK=$(ls "$NDK_DIR/" | sort -V | tail -n 1)
-          echo "Using NDK version: $LATEST_NDK"
-          
-          echo "ANDROID_NDK_HOME=$NDK_DIR/$LATEST_NDK" >> $GITHUB_ENV
-          echo "ANDROID_NDK_ROOT=$NDK_DIR/$LATEST_NDK" >> $GITHUB_ENV
-          echo "ANDROIDNDK=$NDK_DIR/$LATEST_NDK" >> $GITHUB_ENV
-          echo "NDK_ROOT=$NDK_DIR/$LATEST_NDK" >> $GITHUB_ENV
-          
-          # Let buildozer download the recommended NDK 25b instead of using system NDK 28.x
-          echo "Will use buildozer's recommended NDK 25b instead of system NDK $LATEST_NDK"
-        else
-          echo "⚠️ NDK directory not found at $NDK_DIR"
-          echo "Available Android SDK contents:"
-          ls -la /usr/local/lib/android/sdk/ || echo "Android SDK not found"
-        fi
         
     - name: 🏗️ Build APK
       env:
