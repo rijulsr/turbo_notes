@@ -63,14 +63,14 @@ android.api = 30
 # (int) Minimum API your APK will support.
 android.minapi = 21
 
-# (str) Android NDK version to use (23b works better with SDL2 sensors)
-android.ndk = 23b
+# (str) Android NDK version to use (p4a requires 25+)
+android.ndk = 25b
 
 # (int) Android SDK version to use
 android.sdk = 30
 
 # (str) Android SDK directory (if empty, it will be automatically downloaded.)
-#android.sdk_path = 
+#android.sdk_path =
 
 # (str) Android NDK directory (if empty, it will be automatically downloaded.)
 #android.ndk_path =
