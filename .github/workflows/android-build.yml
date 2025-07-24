@@ -163,7 +163,6 @@ jobs:
       env:
         ANDROID_HOME: /usr/local/lib/android/sdk
         ANDROID_SDK_ROOT: /usr/local/lib/android/sdk
-        JAVA_HOME: /usr/lib/jvm/java-17-openjdk-amd64
       run: |
         cd android_app
         echo "Building Android APK..."
@@ -308,7 +307,6 @@ jobs:
         KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
         ANDROID_HOME: /usr/local/lib/android/sdk
         ANDROID_SDK_ROOT: /usr/local/lib/android/sdk
-        JAVA_HOME: /usr/lib/jvm/java-17-openjdk-amd64
       run: |
         cd android_app
         echo "Building release APK..."
