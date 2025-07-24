@@ -18,8 +18,8 @@ source.include_exts = py,png,jpg,kv,atlas,json
 # (str) Application versioning (method 1)
 version = 1.0.0
 
-# (list) Application requirements (simplified for stability)
-requirements = python3,kivy,pillow,pygments,plyer,android,pyjnius
+# (list) Application requirements (GUI app needs KivyMD)
+requirements = python3,kivy,kivymd,pillow,pygments,plyer,android,pyjnius
 
 # (str) Presplash of the application
 #presplash.filename = %(source.dir)s/data/presplash.png
@@ -63,8 +63,8 @@ android.api = 30
 # (int) Minimum API your APK will support.
 android.minapi = 21
 
-# (str) Android NDK version to use (using p4a recommended version)
-android.ndk = 25b
+# (str) Android NDK version to use (23b works better with SDL2 sensors)
+android.ndk = 23b
 
 # (int) Android SDK version to use
 android.sdk = 30
@@ -94,8 +94,8 @@ android.accept_sdk_license = True
 # contains an 'androidx' package, or any package from Kotlin source.
 #android.enable_androidx = True
 
-# (str) Bootstrap to use for android builds (service_only is more stable)
-bootstrap = service_only
+# (str) Bootstrap to use for android builds (GUI apps need sdl2)
+bootstrap = sdl2
 
 # (str) The directory in which python-for-android should look for your own build recipes (if any)
 #p4a.local_recipes = 
