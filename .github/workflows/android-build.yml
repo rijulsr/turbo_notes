@@ -141,6 +141,13 @@ jobs:
           echo "ANDROID_NDK_HOME=$NDK_DIR/$LATEST_NDK" >> $GITHUB_ENV
           echo "ANDROID_NDK_ROOT=$NDK_DIR/$LATEST_NDK" >> $GITHUB_ENV
           echo "ANDROIDNDK=$NDK_DIR/$LATEST_NDK" >> $GITHUB_ENV
+          echo "NDK_ROOT=$NDK_DIR/$LATEST_NDK" >> $GITHUB_ENV
+          
+          # Force buildozer to use system NDK by updating buildozer.spec
+          cd android_app
+          sed -i "s|#android.ndk_path.*|android.ndk_path = $NDK_DIR/$LATEST_NDK|" buildozer.spec
+          sed -i "s|android.ndk_path.*|android.ndk_path = $NDK_DIR/$LATEST_NDK|" buildozer.spec
+          cd ..
         else
           echo "⚠️ NDK directory not found at $NDK_DIR"
           echo "Available Android SDK contents:"
@@ -166,6 +173,9 @@ jobs:
         echo "Using Android NDK: $ANDROID_NDK_ROOT"
         echo "Using Android SDK: $ANDROID_SDK_ROOT"
         echo "JAVA_HOME: $JAVA_HOME"
+        
+        # Force buildozer to not download its own NDK
+        export P4A_SKIP_NDK_DOWNLOAD=1
         
         # Build the APK with verbose output
         buildozer android debug --verbose
@@ -221,7 +231,7 @@ jobs:
           git zip unzip openjdk-17-jdk python3-pip autoconf libtool pkg-config \
           zlib1g-dev libncurses5-dev libncursesw5-dev libtinfo6 cmake \
           libffi-dev libssl-dev build-essential libltdl-dev \
-          ccache
+          ccache automake libtool-bin autotools-dev
           
     - name: Install Python dependencies
       run: |
@@ -289,6 +299,9 @@ jobs:
         echo "Using Android NDK: $ANDROID_NDK_ROOT"
         echo "Using Android SDK: $ANDROID_SDK_ROOT"
         echo "JAVA_HOME: $JAVA_HOME"
+        
+        # Force buildozer to not download its own NDK
+        export P4A_SKIP_NDK_DOWNLOAD=1
         
         if [ -f "my-release-key.keystore" ]; then
           buildozer android release --verbose
