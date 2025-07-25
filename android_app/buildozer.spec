@@ -117,7 +117,10 @@ bootstrap = sdl2
 #p4a.setup_py = false
 
 # (str) extra command line arguments to pass when invoking pythonforandroid.toolchain
-p4a.extra_args = --ignore-setup-py --disable-libffi
+p4a.extra_args = --ignore-setup-py
+
+# (list) A list of recipes to be pulled from specific branches
+p4a.branch_recipes = libffi=develop
 
 [buildozer]
 
