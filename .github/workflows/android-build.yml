@@ -41,40 +41,20 @@ jobs:
         restore-keys: |
           ${{ runner.os }}-buildozer-
           
-    - name: Install system dependencies
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y \
-          build-essential git zip zlib1g-dev \
-          autoconf automake libtool libltdl-dev \
-          pkg-config libffi-dev libssl-dev \
-          cmake ccache gettext
-          
-    - name: Install Python dependencies
-      run: |
-        pip install --upgrade pip
-        pip install cython==0.29.36 buildozer==1.4.0
-        
-    - name: Build Android APK
+    - name: Build APK
       working-directory: android_app
       run: |
-        # Clean previous builds (ignore errors)
-        buildozer android clean || true
-        
-        # Export environment variables for autotools fix
+        sudo apt-get update
+        sudo apt-get install -y build-essential git zip zlib1g-dev autoconf automake libtool libltdl-dev
+        ls -l /usr/share/aclocal/ltdl.m4
+        pip install --upgrade pip
+        pip install cython==0.29.36 buildozer==1.4.0
         export ACLOCAL="aclocal -I /usr/share/aclocal"
         export ACLOCAL_PATH="/usr/share/aclocal:${ACLOCAL_PATH}"
-        export PKG_CONFIG_PATH="/usr/lib/pkgconfig:/usr/share/pkgconfig"
-        
-        # Run libtoolize to ensure libtool macros are available
-        libtoolize --force --copy || true
-        
-        # Build debug APK with verbose output
+        buildozer android clean || true
         buildozer --verbose android debug 2>&1 | tee buildozer_full.log
-        
-        # Check if build succeeded
-        if [ ${PIPESTATUS[0]} -ne 0 ]; then
-          echo "=== BUILD FAILED - Last 100 lines of buildozer log ==="
+        if [ "${PIPESTATUS[0]}" -ne 0 ]; then
+          echo "Last 100 lines:"
           tail -n 100 buildozer_full.log
           exit 1
         fi

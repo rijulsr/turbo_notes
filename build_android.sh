@@ -7,14 +7,12 @@ echo "🚀 Building Turbo Notes Android APK locally..."
 if [[ "$OSTYPE" == "linux-gnu"* ]]; then
     echo "📦 Installing system dependencies (you may need to enter your password)..."
     sudo apt-get update
-    sudo apt-get install -y \
-        build-essential git zip zlib1g-dev \
-        autoconf automake libtool libltdl-dev \
-        pkg-config libffi-dev libssl-dev \
-        cmake ccache gettext \
-        openjdk-17-jdk
-        
-    echo "✅ System dependencies installed"
+    sudo apt-get install -y build-essential git zip zlib1g-dev autoconf automake libtool libltdl-dev
+    
+    # Sanity check for ltdl.m4
+    echo "🔍 Verifying ltdl.m4 is available..."
+    ls -l /usr/share/aclocal/ltdl.m4 || (echo "❌ ltdl.m4 missing" && exit 1)
+    echo "✅ ltdl.m4 found - autotools macros are available"
 fi
 
 # Set JAVA_HOME if not already set
@@ -32,32 +30,26 @@ echo "📱 Building Android APK..."
 # Navigate to android app directory
 cd android_app
 
-# Clean previous builds (ignore errors)
-echo "🧹 Cleaning previous builds..."
-buildozer android clean || true
-
 # Export environment variables for autotools fix
 echo "🔧 Setting up autotools environment..."
 export ACLOCAL="aclocal -I /usr/share/aclocal"
 export ACLOCAL_PATH="/usr/share/aclocal:${ACLOCAL_PATH}"
-export PKG_CONFIG_PATH="/usr/lib/pkgconfig:/usr/share/pkgconfig"
 
 echo "Environment variables:"
 echo "  JAVA_HOME: $JAVA_HOME"
 echo "  ACLOCAL: $ACLOCAL"
 echo "  ACLOCAL_PATH: $ACLOCAL_PATH"
-echo "  PKG_CONFIG_PATH: $PKG_CONFIG_PATH"
 
-# Run libtoolize to ensure libtool macros are available
-echo "🔨 Running libtoolize to prepare autotools environment..."
-libtoolize --force --copy || true
+# Clean previous builds (ignore errors)
+echo "🧹 Cleaning previous builds..."
+buildozer android clean || true
 
 # Build debug APK with verbose output
 echo "🏗️  Building debug APK (this may take a while)..."
 buildozer --verbose android debug 2>&1 | tee buildozer_full.log
 
 # Check if build succeeded and show APK location
-if [ $? -eq 0 ]; then
+if [ "${PIPESTATUS[0]}" -eq 0 ]; then
     echo ""
     echo "🎉 Build completed successfully!"
     echo "📱 APK location: $(pwd)/bin/"
@@ -81,5 +73,7 @@ else
     echo ""
     echo "❌ Build failed! Check the logs above for errors."
     echo "📋 Full build log saved to: buildozer_full.log"
+    echo "Last 100 lines:"
+    tail -n 100 buildozer_full.log
     exit 1
 fi 
