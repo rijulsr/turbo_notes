@@ -166,11 +166,6 @@ jobs:
         ANDROID_SDK_ROOT: /usr/local/lib/android/sdk
       run: |
         set -ex
-        libtoolize --force
-        aclocal
-        autoheader
-        automake --add-missing
-        autoreconf
         cd android_app
         buildozer android debug --verbose 2>&1 | tee buildozer_full.log
         if [ ${PIPESTATUS[0]} -ne 0 ]; then
@@ -291,11 +286,6 @@ jobs:
         ANDROID_SDK_ROOT: /usr/local/lib/android/sdk
       run: |
         set -ex
-        libtoolize --force
-        aclocal
-        autoheader
-        automake --add-missing
-        autoreconf
         cd android_app
         if [ -f "my-release-key.keystore" ]; then
           echo "Building signed release APK..."
