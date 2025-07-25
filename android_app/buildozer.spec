@@ -18,7 +18,7 @@ source.include_exts = py,png,jpg,kv,atlas,json
 # (str) Application versioning (method 1)
 version = 1.0.0
 
-# (list) Application requirements (GUI app needs KivyMD)
+# (list) Application requirements
 requirements = python3,kivy==2.2.1,kivymd==1.1.1,pillow,pygments,plyer,android,pyjnius
 
 # (str) Presplash of the application
@@ -54,45 +54,23 @@ android.logcat_filters = *:S python:D
 # (bool) Copy library instead of making a libpymodules.so
 android.copy_libs = 1
 
-# (str) The Android arch to build for
+# (list) The Android architectures to build for
 android.archs = arm64-v8a, armeabi-v7a
 
 # (int) Target Android API
 android.api = 33
 
-# (int) Minimum API your APK will support.
+# (int) Minimum API your APK will support
 android.minapi = 21
 
 # (str) Android NDK version to use
 android.ndk = 25c
-
-# (int) Android SDK version to use
-android.sdk = 30
-
-# (str) Android SDK directory (leave empty)
-#android.sdk_path = 
-
-# (str) Android NDK directory (leave empty)
-#android.ndk_path = 
 
 # (bool) Use --private data storage (True) or --dir public storage (False)
 android.private_storage = True
 
 # (bool) Automatically accept Android SDK license agreements
 android.accept_sdk_license = True
-
-# (str) Android additional aab/apk to add
-#android.add_aars = 
-
-# (str) Android additional libraries to add
-#android.add_libs = 
-
-# (list) Gradle dependencies to add
-#android.gradle_dependencies = com.google.android.material:material:1.8.0
-
-# (bool) Enable AndroidX support. Enable when 'android.gradle_dependencies'
-# contains an 'androidx' package, or any package from Kotlin source.
-#android.enable_androidx = True
 
 # (str) Bootstrap to use for android builds
 bootstrap = sdl2
@@ -102,9 +80,6 @@ bootstrap = sdl2
 
 # (str) Filename to the hook for p4a
 #p4a.hook = 
-
-# (str) Bootstrap to use for android builds
-# p4a.bootstrap = sdl2
 
 # (int) port number to specify an explicit --port= p4a argument (eg for bootstrap flask)
 #p4a.port = 
@@ -118,9 +93,6 @@ bootstrap = sdl2
 
 # (str) extra command line arguments to pass when invoking pythonforandroid.toolchain
 p4a.extra_args = --ignore-setup-py
-
-# (list) A list of recipes to be pulled from specific branches
-p4a.branch_recipes = libffi=develop
 
 [buildozer]
 
