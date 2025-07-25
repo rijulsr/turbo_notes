@@ -165,37 +165,14 @@ jobs:
         ANDROID_HOME: /usr/local/lib/android/sdk
         ANDROID_SDK_ROOT: /usr/local/lib/android/sdk
       run: |
+        set -ex
+        libtoolize --force
+        aclocal
+        autoheader
+        automake --add-missing
+        autoreconf
         cd android_app
-        echo "Building Android APK..."
-        echo "ANDROID_HOME: $ANDROID_HOME"
-        echo "JAVA_HOME: $JAVA_HOME"
-        
-        # Clean any previous builds and cached NDK
-        buildozer android clean || true
-        rm -rf .buildozer/android/platform/android-ndk-* || true
-        
-        # Configure buildozer to use system NDK
-        echo "Using Android NDK: $ANDROID_NDK_ROOT"
-        echo "Using Android SDK: $ANDROID_SDK_ROOT"
-        echo "JAVA_HOME: $JAVA_HOME"
-        
-        # Force buildozer to not download its own NDK
-        export P4A_SKIP_NDK_DOWNLOAD=1
-        
-        # Set autotools environment variables
-        export ACLOCAL_PATH="/usr/share/aclocal:${ACLOCAL_PATH}"
-        export PKG_CONFIG_PATH="/usr/lib/pkgconfig:/usr/share/pkgconfig:${PKG_CONFIG_PATH}"
-        
-        # Update autotools if libffi needs it
-        echo "Preparing autotools environment..."
-        autoreconf --version
-        libtoolize --version
-        
-        # Build the APK with verbose output and capture full logs
-        echo "Starting buildozer with full logging..."
         buildozer android debug --verbose 2>&1 | tee buildozer_full.log
-        
-        # If build fails, show the last 100 lines of detailed logs
         if [ ${PIPESTATUS[0]} -ne 0 ]; then
           echo "=== BUILD FAILED - Last 100 lines of buildozer log ==="
           tail -n 100 buildozer_full.log
@@ -313,32 +290,13 @@ jobs:
         ANDROID_HOME: /usr/local/lib/android/sdk
         ANDROID_SDK_ROOT: /usr/local/lib/android/sdk
       run: |
+        set -ex
+        libtoolize --force
+        aclocal
+        autoheader
+        automake --add-missing
+        autoreconf
         cd android_app
-        echo "Building release APK..."
-        echo "ANDROID_HOME: $ANDROID_HOME"
-        echo "JAVA_HOME: $JAVA_HOME"
-        
-        # Clean any previous builds and cached NDK
-        buildozer android clean || true
-        rm -rf .buildozer/android/platform/android-ndk-* || true
-        
-        # Configure buildozer to use system NDK
-        echo "Using Android NDK: $ANDROID_NDK_ROOT"
-        echo "Using Android SDK: $ANDROID_SDK_ROOT"
-        echo "JAVA_HOME: $JAVA_HOME"
-        
-        # Let buildozer download its recommended NDK 25b (more stable than system 28.x)
-        # export P4A_SKIP_NDK_DOWNLOAD=1
-        
-        # Set autotools environment variables
-        export ACLOCAL_PATH="/usr/share/aclocal:${ACLOCAL_PATH}"
-        export PKG_CONFIG_PATH="/usr/lib/pkgconfig:/usr/share/pkgconfig:${PKG_CONFIG_PATH}"
-        
-        # Update autotools if libffi needs it
-        echo "Preparing autotools environment..."
-        autoreconf --version
-        libtoolize --version
-        
         if [ -f "my-release-key.keystore" ]; then
           echo "Building signed release APK..."
           buildozer android release --verbose 2>&1 | tee buildozer_release.log
@@ -356,7 +314,7 @@ jobs:
             exit 1
           fi
         fi
-        
+
     - name: Sign APK
       env:
         KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
