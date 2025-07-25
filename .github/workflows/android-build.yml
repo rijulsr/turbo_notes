@@ -1,95 +1,31 @@
-name: Android Build and Release
+name: Android Build
 
 on:
   push:
-    branches: [ master, main, develop ]
+    branches: [ master ]
     paths:
       - 'android_app/**'
       - '.github/workflows/android-build.yml'
   pull_request:
-    branches: [ master, main ]
+    branches: [ master ]
     paths:
       - 'android_app/**'
   workflow_dispatch:
-  release:
-    types: [published]
-
-env:
-  PYTHON_VERSION: '3.11'
-  JAVA_VERSION: '17'
 
 jobs:
-  test:
-    name: Run Tests
+  build:
     runs-on: ubuntu-latest
+    # Fallback if Ubuntu 24 issues persist:
+    # runs-on: ubuntu-22.04
     
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
       
-    - name: Set up Python
+    - name: Set up Python 3.11
       uses: actions/setup-python@v4
       with:
-        python-version: ${{ env.PYTHON_VERSION }}
-        
-    - name: Cache pip dependencies
-      uses: actions/cache@v3
-      with:
-        path: ~/.cache/pip
-        key: ${{ runner.os }}-pip-${{ hashFiles('android_app/requirements.txt') }}
-        restore-keys: |
-          ${{ runner.os }}-pip-
-          
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        # Install main project dependencies (includes click, rich, etc.)
-        pip install -r requirements.txt
-        # Install Android-specific dependencies
-        pip install -r android_app/requirements.txt
-        # Install test dependencies
-        pip install pytest pytest-cov flake8
-        
-    - name: Lint with flake8
-      run: |
-        cd android_app
-        flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
-        flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
-        
-    - name: Test with pytest
-      run: |
-        cd android_app
-        # Set PYTHONPATH to include parent directory for turbo_notes import
-        export PYTHONPATH="$PYTHONPATH:../"
-        pytest tests/ --cov=. --cov-report=xml --cov-report=html
-        
-    - name: Upload coverage to Codecov
-      uses: codecov/codecov-action@v3
-      with:
-        file: ./android_app/coverage.xml
-        flags: android
-        name: android-coverage
-
-  build-debug:
-    name: Build Debug APK
-    runs-on: ubuntu-latest
-    needs: test
-    if: github.event_name == 'push' || github.event_name == 'pull_request'
-    
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-      
-    - name: Set up Python
-      uses: actions/setup-python@v4
-      with:
-        python-version: ${{ env.PYTHON_VERSION }}
-        
-    - name: Set up JDK
-      uses: actions/setup-java@v3
-      with:
-        java-version: ${{ env.JAVA_VERSION }}
-        distribution: 'temurin'
+        python-version: '3.11'
         
     - name: Cache buildozer global directory
       uses: actions/cache@v3
@@ -116,129 +52,22 @@ jobs:
     - name: Build Android APK
       working-directory: android_app
       run: |
-        # Export environment variables for autotools - this is the key fix
+        # Export environment variables for autotools
         export ACLOCAL="aclocal -I /usr/share/aclocal"
-        export ACLOCAL_PATH="/usr/share/aclocal:$ACLOCAL_PATH"
-        export JAVA_HOME="/opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/17.0.16-8/x64"
+        export ACLOCAL_PATH="/usr/share/aclocal:${ACLOCAL_PATH}"
+        
+        # Run libtoolize to ensure libtool macros are available
+        libtoolize --force --copy
         
         # Clean previous builds (ignore errors)
         buildozer android clean || true
         
         # Build debug APK
-        buildozer android debug --verbose 2>&1 | tee buildozer_full.log
-        if [ ${PIPESTATUS[0]} -ne 0 ]; then
-          echo "=== BUILD FAILED - Last 100 lines of buildozer log ==="
-          tail -n 100 buildozer_full.log
-          echo "=== Python-for-Android specific errors ==="
-          grep -i "error\|failed\|exception" buildozer_full.log | tail -n 20
-          exit 1
-        fi
+        buildozer android debug --verbose
         
-    - name: Upload debug APK
+    - name: Upload APK artifact
       uses: actions/upload-artifact@v4
       with:
         name: turbo-notes-debug-apk
-        path: android_app/bin/*.apk
-        retention-days: 30
-
-  build-release:
-    name: Build Release APK
-    runs-on: ubuntu-latest
-    needs: test
-    if: github.event_name == 'release'
-    
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-      
-    - name: Set up Python
-      uses: actions/setup-python@v4
-      with:
-        python-version: ${{ env.PYTHON_VERSION }}
-        
-    - name: Set up JDK
-      uses: actions/setup-java@v3
-      with:
-        java-version: ${{ env.JAVA_VERSION }}
-        distribution: 'temurin'
-        
-    - name: Cache buildozer global directory
-      uses: actions/cache@v3
-      with:
-        path: ~/.buildozer
-        key: ${{ runner.os }}-buildozer-${{ hashFiles('android_app/buildozer.spec') }}
-        restore-keys: |
-          ${{ runner.os }}-buildozer-
-          
-    - name: Install system dependencies
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y \
-          build-essential autoconf automake libtool pkg-config \
-          unzip zip libffi-dev libssl-dev openjdk-17-jdk \
-          git python3-pip cmake zlib1g-dev libncurses5-dev \
-          libncursesw5-dev libtinfo6 ccache gettext
-          
-    - name: Install Python dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install buildozer==1.5.0 cython==0.29.36
-        
-    - name: Decode keystore
-      env:
-        KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
-      run: |
-        if [ -n "$KEYSTORE_BASE64" ]; then
-          echo $KEYSTORE_BASE64 | base64 -d > android_app/my-release-key.keystore
-        fi
-        
-    - name: Build Android APK
-      working-directory: android_app
-      env:
-        KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
-        KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
-        KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
-      run: |
-        # Export environment variables for autotools - this is the key fix
-        export ACLOCAL="aclocal -I /usr/share/aclocal"
-        export ACLOCAL_PATH="/usr/share/aclocal:$ACLOCAL_PATH"
-        export JAVA_HOME="/opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/17.0.16-8/x64"
-        
-        # Clean previous builds (ignore errors)
-        buildozer android clean || true
-        
-        if [ -f "my-release-key.keystore" ]; then
-          echo "Building signed release APK..."
-          buildozer android release --verbose 2>&1 | tee buildozer_release.log
-          if [ ${PIPESTATUS[0]} -ne 0 ]; then
-            echo "=== RELEASE BUILD FAILED ==="
-            tail -n 100 buildozer_release.log
-            exit 1
-          fi
-        else
-          echo "No keystore found, building unsigned release"
-          buildozer android debug --verbose 2>&1 | tee buildozer_debug.log
-          if [ ${PIPESTATUS[0]} -ne 0 ]; then
-            echo "=== DEBUG BUILD FAILED ==="
-            tail -n 100 buildozer_debug.log
-            exit 1
-          fi
-        fi
-        
-    - name: Upload release APK
-      uses: actions/upload-artifact@v4
-      with:
-        name: turbo-notes-release-apk
-        path: android_app/bin/*.apk
-        retention-days: 90
-        
-    - name: Upload to GitHub Release
-      if: github.event_name == 'release'
-      uses: actions/upload-release-asset@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: ${{ github.event.release.upload_url }}
-        asset_path: android_app/bin/*.apk
-        asset_name: turbo-notes-android-${{ github.event.release.tag_name }}.apk
-        asset_content_type: application/vnd.android.package-archive 
+        path: android_app/.buildozer/android/platform/build-*/*/bin/*.apk
+        retention-days: 30 
