@@ -198,12 +198,6 @@ To test on Android emulator:
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-## 🙏 Acknowledgments
-
-- **Rich** - Beautiful terminal formatting
-- **KivyMD** - Material Design for mobile
-- **Cryptography** - Secure encryption
-- **GitHub Actions** - Automated CI/CD
 
 ## 📞 Support
 
@@ -215,8 +209,6 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 <div align="center">
 
-**Built with ❤️ by [Rijul Kansal](https://github.com/rijul-kansal)**
 
-⭐ **Star this repo if you find it useful!** ⭐
 
 </div> 
