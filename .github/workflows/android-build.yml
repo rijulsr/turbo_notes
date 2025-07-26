@@ -1,4 +1,4 @@
-name: Android Build (Direct P4A)
+name: Android Build
 
 on:
   push:
@@ -33,94 +33,22 @@ jobs:
         java-version: '17'
         distribution: 'temurin'
         
-    - name: Setup Android SDK
-      uses: android-actions/setup-android@v3
-      
-    - name: Cache Python-for-Android
-      uses: actions/cache@v3
-      with:
-        path: ~/.local/share/python-for-android
-        key: ${{ runner.os }}-p4a-${{ hashFiles('android_app/requirements.txt') }}
-        restore-keys: |
-          ${{ runner.os }}-p4a-
-          
-    - name: Build APK with Python-for-Android
+    - name: Build APK
       working-directory: android_app
       run: |
-        # Install system dependencies
         sudo apt-get update
         sudo apt-get install -y build-essential git zip zlib1g-dev autoconf automake libtool libltdl-dev
         ls -l /usr/share/aclocal/ltdl.m4
-        
-        # Install Python dependencies
         pip install --upgrade pip
-        pip install cython==0.29.36 python-for-android==2024.1.21
-        
-        # Set environment variables
-        export ANDROID_HOME=/usr/local/lib/android/sdk
-        export ANDROID_SDK_ROOT=/usr/local/lib/android/sdk
-        export ANDROID_NDK_HOME=/usr/local/lib/android/sdk/ndk/25.2.9519653
-        export ANDROID_NDK_ROOT=/usr/local/lib/android/sdk/ndk/25.2.9519653
+        pip install cython==0.29.36 buildozer==1.4.0
         export ACLOCAL="aclocal -I /usr/share/aclocal"
         export ACLOCAL_PATH="/usr/share/aclocal:${ACLOCAL_PATH}"
-        
-        # Create p4a distribution
-        echo "Creating Python-for-Android distribution..."
-        p4a create --dist-name turbo_notes \
-            --bootstrap sdl2 \
-            --requirements python3,kivy==2.2.1,kivymd==1.1.1,pillow,pygments,plyer,android,pyjnius \
-            --arch arm64-v8a --arch armeabi-v7a \
-            --ndk-api 21 \
-            --private . \
-            --package com.turbo.notes \
-            --name "Turbo Notes" \
-            --version 1.0.0 \
-            --orientation portrait \
-            --permission INTERNET \
-            --permission WRITE_EXTERNAL_STORAGE \
-            --permission READ_EXTERNAL_STORAGE \
-            --permission WAKE_LOCK \
-            --permission VIBRATE \
-            --copy-libs \
-            --debug
-            
-        # Build APK
-        echo "Building APK..."
-        p4a apk --dist-name turbo_notes \
-            --arch arm64-v8a --arch armeabi-v7a \
-            --private . \
-            --package com.turbo.notes \
-            --name "Turbo Notes" \
-            --version 1.0.0 \
-            --bootstrap sdl2 \
-            --requirements python3,kivy==2.2.1,kivymd==1.1.1,pillow,pygments,plyer,android,pyjnius \
-            --orientation portrait \
-            --permission INTERNET \
-            --permission WRITE_EXTERNAL_STORAGE \
-            --permission READ_EXTERNAL_STORAGE \
-            --permission WAKE_LOCK \
-            --permission VIBRATE \
-            --copy-libs \
-            --debug
-            
-        # Find and copy the APK
-        echo "Locating built APK..."
-        find ~/.local/share/python-for-android -name "*.apk" -type f | head -5
-        
-        # Create bin directory and copy APK
-        mkdir -p bin
-        find ~/.local/share/python-for-android -name "*turbo*notes*.apk" -type f -exec cp {} bin/ \; || \
-        find ~/.local/share/python-for-android -name "*.apk" -type f -exec cp {} bin/turbo-notes-debug.apk \;
-        
-        # Verify APK was created
-        if ls bin/*.apk 1> /dev/null 2>&1; then
-            echo "✅ APK built successfully:"
-            ls -la bin/*.apk
-        else
-            echo "❌ No APK found in bin/ directory"
-            echo "Available APKs in p4a directory:"
-            find ~/.local/share/python-for-android -name "*.apk" -type f
-            exit 1
+        buildozer android clean || true
+        buildozer --verbose android debug 2>&1 | tee buildozer_full.log
+        if [ "${PIPESTATUS[0]}" -ne 0 ]; then
+          echo "Last 100 lines:"
+          tail -n 100 buildozer_full.log
+          exit 1
         fi
         
     - name: Upload APK artifact
