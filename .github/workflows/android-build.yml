@@ -17,6 +17,10 @@ jobs:
     runs-on: ubuntu-24.04
     # Fallback if Ubuntu 24.04 issues persist:
     # runs-on: ubuntu-22.04
+    env:
+      ACLOCAL: "aclocal -I /usr/share/aclocal"
+      ACLOCAL_PATH: "/usr/share/aclocal:/usr/share/aclocal"
+      PKG_CONFIG_PATH: "/usr/lib/pkgconfig:/usr/share/pkgconfig"
     
     steps:
     - name: Checkout code
@@ -41,8 +45,6 @@ jobs:
         ls -l /usr/share/aclocal/ltdl.m4
         pip install --upgrade pip
         pip install cython==0.29.36 buildozer==1.4.0
-        export ACLOCAL="aclocal -I /usr/share/aclocal"
-        export ACLOCAL_PATH="/usr/share/aclocal:${ACLOCAL_PATH}"
         buildozer android clean || true
         buildozer --verbose android debug 2>&1 | tee buildozer_full.log
         if [ "${PIPESTATUS[0]}" -ne 0 ]; then

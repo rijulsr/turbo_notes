@@ -33,10 +33,12 @@ cd android_app
 # Set environment variables for autotools
 export ACLOCAL="aclocal -I /usr/share/aclocal"
 export ACLOCAL_PATH="/usr/share/aclocal:${ACLOCAL_PATH}"
+export PKG_CONFIG_PATH="/usr/lib/pkgconfig:/usr/share/pkgconfig"
 
 echo "🔧 Environment variables set:"
 echo "  ACLOCAL: $ACLOCAL"
 echo "  ACLOCAL_PATH: $ACLOCAL_PATH"
+echo "  PKG_CONFIG_PATH: $PKG_CONFIG_PATH"
 
 # Clean previous builds
 echo "🧹 Cleaning previous builds..."
