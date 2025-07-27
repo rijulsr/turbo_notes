@@ -14,9 +14,9 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-22.04
     # Fallback if Ubuntu 24.04 issues persist:
-    # runs-on: ubuntu-22.04
+    # runs-on: ubuntu-24.04
     env:
       ACLOCAL: "aclocal -I /usr/share/aclocal"
       ACLOCAL_PATH: "/usr/share/aclocal:/usr/share/aclocal"
