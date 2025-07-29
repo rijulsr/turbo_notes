@@ -38,6 +38,10 @@ version = 1.0.0
 # comma separated e.g. requirements = sqlite3,kivy
 requirements = python3==3.9.18,kivy==2.2.1,kivymd==1.1.1,pillow,pygments,plyer,android,pyjnius
 
+# Force Python version for p4a
+p4a.python_version = 3.9
+p4a.python_version_name = 3.9
+
 # (str) Custom source folders for requirements
 # Sets custom source for any requirements with recipes
 # requirements.source.kivy = ../../kivy
