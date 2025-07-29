@@ -214,9 +214,6 @@ android.accept_sdk_license = True
 # Valid values can be found at https://developer.android.com/guide/topics/manifest/activity-element
 #android.manifest.orientation = fullSensor
 
-# Force python-for-android to use the develop branch for libffi recipe
-p4a.branch_recipes = libffi=develop
-
 [buildozer]
 
 # (int) Log level (0 = error only, 1 = info, 2 = debug (with command output))
