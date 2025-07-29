@@ -36,12 +36,7 @@ version = 1.0.0
 
 # (list) Application requirements
 # comma separated e.g. requirements = sqlite3,kivy
-requirements = python3,kivy==2.2.1,kivymd==1.1.1,pillow,pygments,plyer,android,pyjnius
-
-# Force Python version for p4a
-p4a.python_version = 3.8
-p4a.python_version_name = 3.8
-p4a.bootstrap = sdl2
+requirements = python3==3.7.6,kivy==2.2.1,kivymd==1.1.1,pillow,pygments,plyer,android,pyjnius
 
 # (str) Custom source folders for requirements
 # Sets custom source for any requirements with recipes
@@ -231,4 +226,8 @@ warn_on_root = 1
 # build_dir = ./.buildozer
 
 # (str) Path to build output (i.e. .apk, .aab, .ipa) storage
-# bin_dir = ./bin 
+# bin_dir = ./bin
+
+# Compiler compatibility settings for GCC 13
+p4a.bootstrap = sdl2
+p4a.local_recipes =  
