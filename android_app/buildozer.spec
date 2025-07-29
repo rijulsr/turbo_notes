@@ -36,7 +36,7 @@ version = 1.0.0
 
 # (list) Application requirements
 # comma separated e.g. requirements = sqlite3,kivy
-requirements = python3==3.7.6,kivy==2.2.1,kivymd==1.1.1,pillow,pygments,plyer,android,pyjnius
+requirements = python3==3.9.18,kivy==2.2.1,kivymd==1.1.1,pillow,pygments,plyer,android,pyjnius
 
 # (str) Custom source folders for requirements
 # Sets custom source for any requirements with recipes
@@ -230,4 +230,10 @@ warn_on_root = 1
 
 # Compiler compatibility settings for GCC 13
 p4a.bootstrap = sdl2
-p4a.local_recipes =  
+p4a.local_recipes = 
+
+# Force older C standard for compatibility
+p4a.setup_py = --global-option=build_ext --global-option=--compiler=unix
+
+# Add compiler flags for GCC 13 compatibility
+p4a.extra_args = --extra-cflags="-std=c99" --extra-cxxflags="-std=c++11"  
