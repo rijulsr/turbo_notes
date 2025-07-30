@@ -1,12 +1,12 @@
-# 🚀 Turbo Notes - Secure Cross-Platform Note & Task Manager
+# 🚀 Turbo Notes - Secure Terminal Note & Task Manager
 
-[![🚀 Turbo Notes CI/CD](https://github.com/rijul-kansal/Turbo-notes/actions/workflows/ci.yml/badge.svg)](https://github.com/rijul-kansal/Turbo-notes/actions/workflows/ci.yml)
-[![⚡ Quick Tests](https://github.com/rijul-kansal/Turbo-notes/actions/workflows/quick-test.yml/badge.svg)](https://github.com/rijul-kansal/Turbo-notes/actions/workflows/quick-test.yml)
+[![🚀 Turbo Notes CI/CD](https://github.com/rijulsr/turbo_notes/actions/workflows/ci.yml/badge.svg)](https://github.com/rijulsr/turbo_notes/actions/workflows/ci.yml)
+[![⚡ Quick Tests](https://github.com/rijulsr/turbo_notes/actions/workflows/quick-test.yml/badge.svg)](https://github.com/rijulsr/turbo_notes/actions/workflows/quick-test.yml)
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 
-A **secure**, **cross-platform** productivity application that combines note-taking and task management with beautiful interfaces for both **terminal** and **Android** platforms.
+A **secure**, **cross-platform** productivity application that combines note-taking and task management with a beautiful terminal interface.
 
 ## ✨ Features
 
@@ -18,14 +18,8 @@ A **secure**, **cross-platform** productivity application that combines note-tak
 - **📊 Dashboard**: Overview of overdue tasks, today's agenda, and recent notes
 - **🔍 Search**: Find notes and tasks quickly across all content
 - **📈 Statistics**: Streak tracking and productivity insights
-
-### 📱 Android Version (KivyMD)
-- **🎨 Material Design**: Clean, modern mobile interface
-- **📱 Touch Optimized**: Intuitive navigation with bottom tabs
-- **💾 Local Storage**: Secure local data storage on device
-- **🔄 Real-time Sync**: Instant updates across app components
-- **✨ Animations**: Smooth transitions and feedback
-- **📊 Dashboard**: Mobile-optimized stats and overview
+- **💾 Local Storage**: Secure local data storage with JSON format
+- **🔄 Real-time Updates**: Instant updates across all features
 
 ## 🚀 Quick Start
 
@@ -35,26 +29,11 @@ A **secure**, **cross-platform** productivity application that combines note-tak
 
 ### 📥 Installation
 
-#### For Terminal Use:
 ```bash
-git clone https://github.com/rijul-kansal/Turbo-notes.git
-cd Turbo-notes
+git clone https://github.com/rijulsr/turbo_notes.git
+cd turbo_notes
 pip install -r requirements.txt
 python turbo_notes.py
-```
-
-#### For Android Development:
-```bash
-cd android_app
-pip install -r requirements.txt
-python main.py  # Run on desktop first
-```
-
-#### Build Android APK:
-```bash
-cd android_app
-pip install buildozer
-buildozer android debug
 ```
 
 ## 🎯 Usage
@@ -71,10 +50,12 @@ python turbo_notes.py --list-tasks
 python turbo_notes.py --dashboard
 ```
 
-### Android App
-1. **Dashboard Tab**: View stats, overdue tasks, and recent notes
-2. **Notes Tab**: Create, view, and manage notes with categories
-3. **Tasks Tab**: Add tasks, set priorities, and mark complete
+### Interactive Features
+1. **Dashboard**: View stats, overdue tasks, and recent notes
+2. **Notes Management**: Create, view, edit, and delete notes with categories
+3. **Task Management**: Add tasks, set priorities, due dates, and mark complete
+4. **Search**: Find notes and tasks quickly
+5. **Statistics**: Track your productivity streaks and usage
 
 ## 🏗️ CI/CD Pipeline
 
@@ -95,15 +76,9 @@ Our automated pipeline includes:
 - **Code coverage** reporting
 - **Basic functionality validation**
 
-### 📱 **Android Build** (Master Branch)
-- **Automated APK generation**
-- **Build artifact storage** (30 days)
-- **Release automation**
-
 ### 📬 **Notifications**
-- **Slack integration** for build failures (optional)
 - **GitHub status checks**
-- **Automated releases** with APK downloads
+- **Automated quality gates**
 
 ## 📊 Project Structure
 
@@ -113,14 +88,13 @@ Turbo-notes/
 │   └── workflows/           # CI/CD pipelines
 │       ├── ci.yml          # Main CI/CD pipeline
 │       └── quick-test.yml  # Fast validation
-├── android_app/
-│   ├── main.py             # Android app (KivyMD)
-│   ├── buildozer.spec      # Android build config
-│   ├── requirements.txt    # Android dependencies
-│   └── tests/              # Android app tests
-├── turbo_notes.py          # Terminal application
-├── requirements.txt        # Core dependencies
-└── README.md              # This file
+├── turbo_notes.py          # Main terminal application
+├── setup.py               # Installation script
+├── setup_complete.py      # Complete setup script
+├── requirements.txt       # Python dependencies
+├── .isort.cfg            # Import sorting config
+├── .gitignore            # Git ignore rules
+└── README.md             # This file
 ```
 
 ## 🔧 Development
@@ -134,22 +108,22 @@ pytest
 pytest --cov=turbo_notes --cov-report=html
 
 # Specific test file
-pytest android_app/tests/test_terminal_integration.py -v
+pytest tests/test_terminal_integration.py -v
 ```
 
 ### Code Quality
 ```bash
 # Format code
-black turbo_notes.py android_app/main.py
+black turbo_notes.py
 
 # Sort imports  
-isort turbo_notes.py android_app/main.py
+isort turbo_notes.py
 
 # Lint
-flake8 turbo_notes.py android_app/main.py --max-line-length=100
+flake8 turbo_notes.py --max-line-length=100
 
 # Security check
-bandit -r turbo_notes.py android_app/main.py
+bandit -r turbo_notes.py
 ```
 
 ## 🛠️ Configuration
@@ -159,20 +133,7 @@ bandit -r turbo_notes.py android_app/main.py
 - **Categories**: Customize note categories
 - **Export**: JSON export functionality
 - **Statistics**: Usage tracking and streaks
-
-### Android App Settings
-- **Theme**: Dark/Light mode support
-- **Notifications**: Task reminder system
-- **Sync**: Future cloud sync capability
-- **Code Highlighting**: Syntax highlighting for code notes
-
-## 📱 Android Emulator Testing
-
-To test on Android emulator:
-
-1. **Start Emulator**: `emulator -avd your_avd_name`
-2. **Build APK**: `cd android_app && buildozer android debug`
-3. **Install**: `adb install bin/*.apk`
+- **Data Storage**: Local JSON files with encryption
 
 ## 🤝 Contributing
 
@@ -188,27 +149,28 @@ To test on Android emulator:
 - [ ] **Cloud Sync**: Cross-device synchronization
 - [ ] **Web Version**: Browser-based interface
 - [ ] **Plugins**: Extension system
-- [ ] **Themes**: Customizable UI themes
+- [ ] **Themes**: Customizable terminal themes
 - [ ] **Collaboration**: Shared notes and tasks
 - [ ] **Advanced Search**: Full-text search with filters
 - [ ] **Backup/Restore**: Automated backup system
 - [ ] **Voice Notes**: Audio note recording
+- [ ] **Markdown Support**: Rich text formatting
+- [ ] **Tags System**: Advanced categorization
 
 ## 📄 License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-
 ## 📞 Support
 
-- **Issues**: [GitHub Issues](https://github.com/rijul-kansal/Turbo-notes/issues)
-- **Discussions**: [GitHub Discussions](https://github.com/rijul-kansal/Turbo-notes/discussions)
-- **Email**: [Create an issue for support](https://github.com/rijul-kansal/Turbo-notes/issues/new)
+- **Issues**: [GitHub Issues](https://github.com/rijulsr/turbo_notes/issues)
+- **Discussions**: [GitHub Discussions](https://github.com/rijulsr/turbo_notes/discussions)
+- **Email**: [Create an issue for support](https://github.com/rijulsr/turbo_notes/issues/new)
 
 ---
 
 <div align="center">
 
-
+**Made with ❤️ for productivity enthusiasts**
 
 </div> 
