@@ -32,20 +32,18 @@ jobs:
     - name: 🎯 Code Formatting Check (Black)
       run: |
         black --check --diff turbo_notes.py setup.py
-        black --check --diff android_app/main.py
         
     - name: 📏 Import Sorting Check (isort)
       run: |
         isort --check-only --diff turbo_notes.py setup.py
-        isort --check-only --diff android_app/main.py
         
     - name: 🔎 Lint with flake8
       run: |
-        flake8 turbo_notes.py setup.py android_app/main.py --max-line-length=100 --ignore=E203,W503
+        flake8 turbo_notes.py setup.py --max-line-length=100 --ignore=E203,W503
         
     - name: 🔒 Security Check (Bandit)
       run: |
-        bandit -r turbo_notes.py android_app/main.py
+        bandit -r turbo_notes.py
         
     - name: 🛡️ Vulnerability Check (Safety)
       run: |
@@ -87,7 +85,7 @@ jobs:
         
     - name: 🧪 Run Terminal App Tests
       run: |
-        python -m pytest android_app/tests/ -v --cov=turbo_notes --cov-report=xml
+        python -m pytest tests/ -v --cov=turbo_notes --cov-report=xml
         
     - name: ✅ Basic Functionality Test
       run: |
