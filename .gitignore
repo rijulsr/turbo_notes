@@ -123,17 +123,6 @@ dmypy.json
 
 # Turbo Notes specific
 .turbo-notes/
-.turbo-notes-mobile/
-
-# Android build files
-android_app/.buildozer/
-android_app/bin/
-android_app/build/
-*.apk
-*.aab
-
-# Kivy
-.kivy/
 
 # IDE files
 .vscode/
