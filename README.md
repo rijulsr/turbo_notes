@@ -76,6 +76,11 @@ Our automated pipeline includes:
 - **Code coverage** reporting
 - **Basic functionality validation**
 
+### 🔒 **Security** (Every Push)
+- **Bandit** security scanning
+- **Safety** vulnerability checks
+- **Security reports** generation
+
 ### 📬 **Notifications**
 - **GitHub status checks**
 - **Automated quality gates**
