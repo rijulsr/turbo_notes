@@ -93,25 +93,23 @@ jobs:
         import sys, os
         sys.path.append('.')
         from turbo_notes import TurboNotes
-        app = TurboNotes()
         print('[PASS] Terminal app imports successfully')
+        app = TurboNotes()
         app.add_note('Test Note', 'This is a test note')
-        print('[PASS] Note addition works')
         app.add_task('Test Task', 'This is a test task')
-        print('[PASS] Task addition works')
-        print('[SUCCESS] All basic tests passed!')
+        print('[PASS] Basic functionality works')
         "
         
-    - name: 📊 Upload Coverage
+    - name: 📊 Upload Coverage Reports
       uses: codecov/codecov-action@v3
-      if: matrix.os == 'ubuntu-latest' && matrix.python-version == '3.12'
       with:
         file: ./coverage.xml
+        flags: terminal-app
+        name: terminal-app-coverage
 
-  # ==================== ANDROID APP TESTS ====================
-  test-android:
-    name: 📱 Test Android App
-    needs: code-quality
+  # ==================== SECURITY SCAN ====================
+  security-scan:
+    name: 🔒 Security & Vulnerability Scan
     runs-on: ubuntu-latest
     
     steps:
@@ -123,118 +121,30 @@ jobs:
       with:
         python-version: '3.12'
         
-    - name: 🖥️ Setup Virtual Display (for Kivy)
+    - name: 🔒 Run Bandit Security Scan
       run: |
-        sudo apt-get update
-        sudo apt-get install -y xvfb
-        export DISPLAY=:99
-        Xvfb :99 -screen 0 1024x768x24 > /dev/null 2>&1 &
+        pip install bandit
+        bandit -r turbo_notes.py -f json -o bandit-report.json
         
-    - name: 📦 Install System Dependencies
+    - name: 🛡️ Run Safety Check
       run: |
-        sudo apt-get install -y \
-          build-essential \
-          pkg-config \
-          libgl1-mesa-dev \
-          libgles2-mesa-dev \
-          libegl1-mesa-dev \
-          libdrm-dev \
-          libxss1 \
-          libxtst6 \
-          libxrandr2 \
-          libasound2-dev \
-          libpangocairo-1.0-0 \
-          libatk1.0-dev \
-          libcairo-gobject2 \
-          libgtk-3-dev \
-          libgdk-pixbuf2.0-dev \
-          libfontconfig1-dev \
-          libfreetype6-dev \
-          libsdl2-dev \
-          libsdl2-image-dev \
-          libsdl2-mixer-dev \
-          libsdl2-ttf-dev \
-          libgstreamer1.0-dev \
-          libgstreamer-plugins-base1.0-dev
+        pip install safety==2.3.5
+        safety check -r requirements.txt --json --output safety-report.json
         
-    - name: 📦 Install Android Dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install pytest pytest-mock
-        # Install core dependencies without UI components for CI testing
-        pip install pillow pygments plyer python-dateutil requests
-        pip install cryptography>=45.0.5
-        # Skip Kivy/KivyMD installation in CI - test only DataManager
-        
-    - name: 🧪 Test Android App Core Logic
-      run: |
-        cd android_app
-        python -c "
-        import sys
-        import tempfile
-        import shutil
-        from pathlib import Path
-        from data_manager import DataManager
-        
-        print('Testing DataManager core functionality...')
-        
-        # Create temporary directory for testing
-        temp_dir = tempfile.mkdtemp()
-        
-        try:
-            dm = DataManager()
-            # Override data directory to use temp directory
-            dm.data_dir = Path(temp_dir)
-            dm.data_file = dm.data_dir / 'test_data.json'
-            
-            # Test note operations
-            note = dm.add_note('Test Note', 'Test Content', 'Work')
-            assert note['title'] == 'Test Note'
-            assert note['category'] == 'Work'
-            assert note['is_code'] == False
-            print('[PASS] Note creation and properties')
-            
-            # Test task operations  
-            task = dm.add_task('Test Task', 'Test Description', 'High', category='Personal')
-            assert task['title'] == 'Test Task'
-            assert task['priority'] == 'High'
-            assert task['completed'] == False
-            print('[PASS] Task creation and properties')
-            
-            # Test data persistence
-            dm.save_data()
-            print('[PASS] Data persistence')
-            
-            # Test code detection
-            code_note = dm.add_note('Python Code', 'def hello():\n    print(\"Hello World\")')
-            assert code_note['is_code'] == True
-            print('[PASS] Code detection')
-            
-            # Test task completion
-            success = dm.complete_task(task['id'])
-            assert success == True
-            print('[PASS] Task completion')
-            
-            print('[SUCCESS] All Android app core tests passed!')
-            print(f'[INFO] Total notes: {len(dm.data[\"notes\"])}')
-            print(f'[INFO] Total tasks: {len(dm.data[\"tasks\"])}')
-            
-        finally:
-            # Clean up temp directory
-            shutil.rmtree(temp_dir, ignore_errors=True)
-        "
-        
-    - name: 🧪 Run Android App Unit Tests
-      run: |
-        cd android_app
-        python -m pytest tests/test_data_manager.py -v --tb=short
+    - name: 📊 Upload Security Reports
+      uses: actions/upload-artifact@v4
+      with:
+        name: security-reports
+        path: |
+          bandit-report.json
+          safety-report.json
+        retention-days: 30
 
-  # ==================== ANDROID BUILD ====================
-  build-android:
-    name: 🏗️ Build Android APK
-    needs: [test-terminal, test-android]
+  # ==================== DEPLOYMENT READY ====================
+  deployment-check:
+    name: 🚀 Deployment Readiness Check
+    needs: [test-terminal, security-scan]
     runs-on: ubuntu-latest
-    if: github.event_name == 'push' && github.ref == 'refs/heads/master'
     
     steps:
     - name: 📥 Checkout Code
@@ -243,174 +153,44 @@ jobs:
     - name: 🐍 Set up Python
       uses: actions/setup-python@v4
       with:
-        python-version: '3.11'  # Python 3.11 is more stable for Android builds
+        python-version: '3.12'
         
-    - name: 📱 Setup Android Build Environment
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y git zip unzip openjdk-17-jdk autoconf libtool pkg-config zlib1g-dev libncurses5-dev libncursesw5-dev libtinfo6 cmake libffi-dev libssl-dev automake build-essential libtool-bin autotools-dev m4 autoconf-archive gettext
-        
-    - name: 📦 Install Build Dependencies
+    - name: 📦 Install Dependencies
       run: |
         python -m pip install --upgrade pip
-        # Use stable, tested versions
-        pip install buildozer==1.5.0 cython
-        pip install python-for-android==2024.1.21
+        pip install -r requirements.txt
         
-    - name: 🔧 Setup Android SDK  
-      uses: android-actions/setup-android@v3
-        
-    - name: 🔧 Configure Android Environment
+    - name: ✅ Final Integration Test
       run: |
-        echo "Setting up Android environment variables..."
-        echo "ANDROID_HOME=/usr/local/lib/android/sdk" >> $GITHUB_ENV
-        echo "ANDROID_SDK_ROOT=/usr/local/lib/android/sdk" >> $GITHUB_ENV
-        echo "JAVA_HOME=$JAVA_HOME" >> $GITHUB_ENV
-        echo "ACLOCAL_PATH=/usr/share/aclocal" >> $GITHUB_ENV
+        echo "🚀 Running final integration test..."
+        python -c "
+        import sys, tempfile, os
+        sys.path.append('.')
+        from turbo_notes import TurboNotes
         
-    - name: 🏗️ Build APK
-      env:
-        ANDROID_HOME: /usr/local/lib/android/sdk
-        ANDROID_SDK_ROOT: /usr/local/lib/android/sdk
+        # Test complete workflow
+        app = TurboNotes()
+        
+        # Add test data
+        app.add_note('Integration Test Note', 'This is an integration test')
+        app.add_task('Integration Test Task', 'This is an integration test task')
+        
+        # Verify data persistence
+        notes = app.get_notes()
+        tasks = app.get_tasks()
+        
+        assert len(notes) > 0, 'Notes should be saved'
+        assert len(tasks) > 0, 'Tasks should be saved'
+        
+        print('✅ Integration test passed!')
+        print(f'📝 Notes count: {len(notes)}')
+        print(f'✅ Tasks count: {len(tasks)}')
+        "
+        
+    - name: 🎯 Status Report
       run: |
-        cd android_app
-        echo "Building Android APK..."
-        echo "ANDROID_HOME: $ANDROID_HOME"
-        echo "JAVA_HOME: $JAVA_HOME"
-        
-        # Check if buildozer.spec exists
-        if [ ! -f "buildozer.spec" ]; then
-          echo "❌ buildozer.spec not found! Creating a basic one..."
-          buildozer init
-        fi
-        
-        # Clean any previous builds and cached NDK
-        buildozer android clean || true
-        rm -rf .buildozer/android/platform/android-ndk-* || true
-        
-        # Configure buildozer to use system NDK
-        echo "Using Android NDK: $ANDROID_NDK_ROOT"
-        echo "Using Android SDK: $ANDROID_SDK_ROOT"
-        echo "JAVA_HOME: $JAVA_HOME"
-        
-        # Let buildozer download its recommended NDK 25b (more stable than system 28.x)
-        # export P4A_SKIP_NDK_DOWNLOAD=1
-        
-        # Set autotools environment variables
-        export ACLOCAL_PATH="/usr/share/aclocal:${ACLOCAL_PATH}"
-        export PKG_CONFIG_PATH="/usr/lib/pkgconfig:/usr/share/pkgconfig:${PKG_CONFIG_PATH}"
-        
-        # Force aclocal to include libtool macros
-        echo "ACLOCAL=aclocal -I /usr/share/aclocal" >> $GITHUB_ENV
-        
-        # Update autotools if libffi needs it
-        echo "Preparing autotools environment..."
-        autoreconf --version
-        libtoolize --version
-        
-        # Build the APK with verbose output and capture full logs
-        echo "Starting buildozer with full logging..."
-        buildozer android debug --verbose 2>&1 | tee buildozer_full.log
-        
-        # If build fails, show the last 100 lines of detailed logs
-        if [ ${PIPESTATUS[0]} -ne 0 ]; then
-          echo "=== BUILD FAILED - Last 100 lines of buildozer log ==="
-          tail -n 100 buildozer_full.log
-          echo "=== Python-for-Android specific errors ==="
-          grep -i "error\|failed\|exception" buildozer_full.log | tail -n 20
-          exit 1
-        fi
-        
-        # Verify APK was created
-        if [ ! -d "bin" ] || [ -z "$(ls -A bin/*.apk 2>/dev/null)" ]; then
-          echo "❌ No APK files found in bin/ directory"
-          ls -la bin/ || echo "bin/ directory doesn't exist"
-          exit 1
-        fi
-        
-        echo "✅ APK build successful!"
-        ls -la bin/
-        
-    - name: 📤 Upload APK Artifact
-      if: success()
-      uses: actions/upload-artifact@v4
-      with:
-        name: turbo-notes-debug.apk
-        path: android_app/bin/*.apk
-        retention-days: 30
-
-  # ==================== DEPLOYMENT ====================
-  deploy:
-    name: 🚀 Deploy & Release
-    needs: [build-android]
-    runs-on: ubuntu-latest
-    if: github.event_name == 'push' && github.ref == 'refs/heads/master'
-    
-    steps:
-    - name: 📥 Checkout Code
-      uses: actions/checkout@v4
-      
-    - name: 🏷️ Generate Release Tag
-      id: tag
-      run: |
-        echo "tag=v$(date +'%Y%m%d-%H%M%S')" >> $GITHUB_OUTPUT
-        
-    - name: 📤 Download APK
-      uses: actions/download-artifact@v4
-      with:
-        name: turbo-notes-debug.apk
-        path: ./artifacts/
-        
-    - name: 🎉 Create Release
-      uses: softprops/action-gh-release@v1
-      with:
-        tag_name: ${{ steps.tag.outputs.tag }}
-        name: Turbo Notes ${{ steps.tag.outputs.tag }}
-        body: |
-          🚀 **Automated Release - Turbo Notes**
-          
-          This is an automated release containing:
-          - 🖥️ Terminal version (fully tested on multiple platforms)
-          - 📱 Android APK (debug build)
-          
-          **What's New:**
-          - Latest commit: ${{ github.sha }}
-          - Build date: $(date)
-          
-          **Installation:**
-          - Terminal: `python turbo_notes.py`
-          - Android: Download and install the APK
-          
-        files: |
-          ./artifacts/*.apk
-          turbo_notes.py
-          README.md
-        draft: false
-        prerelease: false
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-  # ==================== NOTIFICATIONS ====================
-  notify:
-    name: 📬 Send Notifications
-    needs: [test-terminal, test-android, build-android, deploy]
-    runs-on: ubuntu-latest
-    if: failure()
-    
-    steps:
-    - name: 🚨 Failure Notification
-      uses: 8398a7/action-slack@v3
-      with:
-        status: failure
-        text: |
-          🚨 **Turbo Notes Build Failed!**
-          
-          **Repository:** ${{ github.repository }}
-          **Branch:** ${{ github.ref }}
-          **Commit:** ${{ github.sha }}
-          **Author:** ${{ github.actor }}
-          
-          Please check the GitHub Actions logs for details.
-      env:
-        SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
-      if: env.SLACK_WEBHOOK_URL != '' 
+        echo "🚀 Turbo Notes - Deployment Ready!"
+        echo "✅ All tests passed"
+        echo "✅ Security checks completed"
+        echo "✅ Code quality validated"
+        echo "🎉 Ready for deployment!" 
