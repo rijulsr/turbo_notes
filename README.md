@@ -1,4 +1,4 @@
-# 🚀 Turbo Notes - Secure Terminal Note & Task Manager
+#  Turbo Notes - Secure Terminal Note & Task Manager
 
 [![🚀 Turbo Notes CI/CD](https://github.com/rijulsr/turbo_notes/actions/workflows/ci.yml/badge.svg)](https://github.com/rijulsr/turbo_notes/actions/workflows/ci.yml)
 [![⚡ Quick Tests](https://github.com/rijulsr/turbo_notes/actions/workflows/quick-test.yml/badge.svg)](https://github.com/rijulsr/turbo_notes/actions/workflows/quick-test.yml)
