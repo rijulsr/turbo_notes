@@ -366,11 +366,12 @@ class TurboNotes:
             self.console.print("3. ✅ Add Task")
             self.console.print("4. 📋 View All Tasks")
             self.console.print("5. ✔️  Complete Task")
-            self.console.print("6. 🔍 Search")
-            self.console.print("7. ⚙️  Settings")
-            self.console.print("8. 🚪 Exit")
+            self.console.print("6. 🗑️  Delete Item")
+            self.console.print("7. 🔍 Search")
+            self.console.print("8. ⚙️  Settings")
+            self.console.print("9. 🚪 Exit")
             choice = Prompt.ask(
-                "\nSelect an option", choices=["1", "2", "3", "4", "5", "6", "7", "8"]
+                "\nSelect an option", choices=["1", "2", "3", "4", "5", "6", "7", "8", "9"]
             )
 
             if choice == "1":
@@ -384,10 +385,12 @@ class TurboNotes:
             elif choice == "5":
                 self.complete_task_interactive()
             elif choice == "6":
-                self.search_interactive()
+                self.delete_menu()
             elif choice == "7":
-                self.settings_menu()
+                self.search_interactive()
             elif choice == "8":
+                self.settings_menu()
+            elif choice == "9":
                 self.console.print("\n[bold blue]👋 See you later![/bold blue]")
                 break
 
@@ -441,6 +444,24 @@ class TurboNotes:
 
         input("\nPress Enter to continue...")
 
+    def delete_note(self, note_id: int) -> bool:
+        """Delete a note by ID"""
+        for i, note in enumerate(self.data["notes"]):
+            if note["id"] == note_id:
+                del self.data["notes"][i]
+                self.save_data()
+                return True
+        return False
+
+    def delete_task(self, task_id: int) -> bool:
+        """Delete a task by ID"""
+        for i, task in enumerate(self.data["tasks"]):
+            if task["id"] == task_id:
+                del self.data["tasks"][i]
+                self.save_data()
+                return True
+        return False
+
     def delete_note_interactive(self):
         """Delete a note interactively"""
         self.console.print("\n[bold blue]🗑️  Delete Note[/bold blue]")
@@ -451,13 +472,35 @@ class TurboNotes:
                 self.console.print(f"{note['id']}. {note['title']}")
             try:
                 note_id = int(Prompt.ask("\nEnter note ID to delete"))
-                self.data["notes"] = [
-                    n for n in self.data["notes"] if n["id"] != note_id
-                ]
-                self.save_data()
-                self.console.print("[green]✓ Note deleted![/green]")
+                confirm = Prompt.ask("Are you sure?", choices=["y", "n"], default="n")
+                if confirm.lower() == "y":
+                    if self.delete_note(note_id):
+                        self.console.print("[green]✓ Note deleted![/green]")
+                    else:
+                        self.console.print("[red]Note not found.[/red]")
             except ValueError:
                 self.console.print("[red]Invalid note ID.[/red]")
+        input("\nPress Enter to continue...")
+
+    def delete_task_interactive(self):
+        """Delete a task interactively"""
+        self.console.print("\n[bold blue]🗑️  Delete Task[/bold blue]")
+        if "tasks" not in self.data or not self.data["tasks"]:
+            self.console.print("[dim]No tasks to delete.[/dim]")
+        else:
+            for task in self.data["tasks"]:
+                status = "✅" if task["completed"] else "⏳"
+                self.console.print(f"{task['id']}. {status} {task['title']}")
+            try:
+                task_id = int(Prompt.ask("\nEnter task ID to delete"))
+                confirm = Prompt.ask("Are you sure?", choices=["y", "n"], default="n")
+                if confirm.lower() == "y":
+                    if self.delete_task(task_id):
+                        self.console.print("[green]✓ Task deleted![/green]")
+                    else:
+                        self.console.print("[red]Task not found.[/red]")
+            except ValueError:
+                self.console.print("[red]Invalid task ID.[/red]")
         input("\nPress Enter to continue...")
 
     def search_interactive(self):

@@ -6,18 +6,28 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 
-A **secure**, **cross-platform** productivity application that combines note-taking and task management with a beautiful terminal interface.
+A **secure**, **minimalist**, and **addictive** productivity application that combines note-taking and task management with a beautiful terminal interface.
 
 ## ✨ Features
 
-### 🖥️ Terminal Version
+### 🎯 **Minimalist Design**
+- **🚀 Quick Actions**: Single-key shortcuts for common tasks
+- **📱 Streamlined Interface**: Clean, uncluttered dashboard
+- **⚡ Instant Feedback**: Immediate visual confirmation for all actions
+- **🎨 Beautiful UI**: Rich terminal interface with emojis and colors
+
+### 🔥 **Addictive Features**
+- **🔥 Daily Streaks**: Track your productivity streak with motivational emojis
+- **🏆 Best Streak Tracking**: Challenge yourself to beat your record
+- **📊 Progress Stats**: Visual progress indicators and completion rates
+- **🎯 Gamification**: Achievement-style feedback for completed tasks
+
+### 🖥️ **Core Functionality**
 - **🔐 Encryption**: Optional password protection with PBKDF2 + Fernet encryption
-- **📝 Rich Notes**: Full-featured note management with categories and search
+- **📝 Rich Notes**: Full-featured note management with search
 - **✅ Smart Tasks**: Priority levels, due dates, and completion tracking
-- **🎨 Beautiful UI**: Rich terminal interface with ASCII art and colors
-- **📊 Dashboard**: Overview of overdue tasks, today's agenda, and recent notes
+- **🗑️ Delete Functionality**: Easy deletion of notes and tasks
 - **🔍 Search**: Find notes and tasks quickly across all content
-- **📈 Statistics**: Streak tracking and productivity insights
 - **💾 Local Storage**: Secure local data storage with JSON format
 - **🔄 Real-time Updates**: Instant updates across all features
 
@@ -38,9 +48,9 @@ python turbo_notes.py
 
 ## 🎯 Usage
 
-### Terminal Commands
+### Quick Actions (New!)
 ```bash
-# Interactive mode (recommended)
+# Interactive mode with quick actions
 python turbo_notes.py
 
 # Quick commands
@@ -50,12 +60,23 @@ python turbo_notes.py --list-tasks
 python turbo_notes.py --dashboard
 ```
 
-### Interactive Features
-1. **Dashboard**: View stats, overdue tasks, and recent notes
-2. **Notes Management**: Create, view, edit, and delete notes with categories
-3. **Task Management**: Add tasks, set priorities, due dates, and mark complete
-4. **Search**: Find notes and tasks quickly
-5. **Statistics**: Track your productivity streaks and usage
+### Interactive Quick Actions
+- **n** - 📝 Quick Note (add note with minimal prompts)
+- **t** - ✅ Quick Task (add task with priority)
+- **c** - ✔️ Complete Task (mark tasks as done)
+- **d** - 🗑️ Delete Item (remove notes or tasks)
+- **s** - 🔍 Search (find content quickly)
+- **v** - 👁️ View All (detailed views)
+- **q** - 🚪 Quit
+
+### Key Features
+1. **🔥 Streak Tracking**: Build momentum with daily streaks
+2. **📊 Dashboard**: View stats, overdue tasks, and recent notes
+3. **🗑️ Delete Management**: Easy deletion with confirmation
+4. **📝 Notes Management**: Create, view, and delete notes
+5. **✅ Task Management**: Add tasks, set priorities, mark complete
+6. **🔍 Search**: Find notes and tasks quickly
+7. **📈 Statistics**: Track your productivity streaks and usage
 
 ## 🏗️ CI/CD Pipeline
 
@@ -151,6 +172,10 @@ bandit -r turbo_notes.py
 
 ## 📋 Roadmap
 
+- [x] **🗑️ Delete Functionality**: Easy deletion of notes and tasks
+- [x] **🚀 Quick Actions**: Single-key shortcuts for common tasks
+- [x] **🔥 Streak Tracking**: Daily productivity streaks
+- [x] **📱 Minimalist Design**: Streamlined interface
 - [ ] **Cloud Sync**: Cross-device synchronization
 - [ ] **Web Version**: Browser-based interface
 - [ ] **Plugins**: Extension system
