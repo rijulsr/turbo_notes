@@ -8,7 +8,7 @@ import getpass
 import json
 import os
 import sys
-from datetime import datetime
+from datetime import datetime, timedelta
 from pathlib import Path
 
 import click
@@ -39,6 +39,17 @@ class TurboNotes:
             "categories": ["Personal", "Work", "Ideas"],
             "last_accessed": None,
             "password_enabled": None,
+            "streak": {
+                "current": 0,
+                "best": 0,
+                "last_activity": None
+            },
+            "stats": {
+                "total_notes": 0,
+                "total_tasks": 0,
+                "completed_tasks": 0,
+                "first_use": None
+            }
         }
 
     def generate_key_from_password(self, password: str) -> bytes:
@@ -173,6 +184,29 @@ class TurboNotes:
         except Exception as e:
             self.console.print(f"[red]Failed to save data: {e}[/red]")
 
+    def update_streak(self):
+        """Update user streak based on activity"""
+        today = datetime.now().date()
+        last_activity = self.data["streak"].get("last_activity")
+        
+        if last_activity:
+            last_date = datetime.fromisoformat(last_activity).date()
+            if today == last_date:
+                return  # Already updated today
+            elif today - last_date == timedelta(days=1):
+                # Consecutive day
+                self.data["streak"]["current"] += 1
+            else:
+                # Break in streak
+                self.data["streak"]["current"] = 1
+        else:
+            # First activity
+            self.data["streak"]["current"] = 1
+        
+        self.data["streak"]["last_activity"] = datetime.now().isoformat()
+        if self.data["streak"]["current"] > self.data["streak"]["best"]:
+            self.data["streak"]["best"] = self.data["streak"]["current"]
+
     def add_note(self, title: str, content: str):
         """Add a new note"""
         note = {
@@ -183,6 +217,8 @@ class TurboNotes:
             "modified": datetime.now().isoformat(),
         }
         self.data["notes"].append(note)
+        self.data["stats"]["total_notes"] += 1
+        self.update_streak()
         self.save_data()
 
     def add_task(
@@ -209,6 +245,8 @@ class TurboNotes:
             "modified": datetime.now().isoformat(),
         }
         self.data["tasks"].append(task)
+        self.data["stats"]["total_tasks"] += 1
+        self.update_streak()
         self.save_data()
         return task
 
@@ -218,9 +256,11 @@ class TurboNotes:
             return False
 
         for task in self.data["tasks"]:
-            if task["id"] == task_id:
+            if task["id"] == task_id and not task["completed"]:
                 task["completed"] = True
                 task["completed_date"] = datetime.now().isoformat()
+                self.data["stats"]["completed_tasks"] += 1
+                self.update_streak()
                 self.save_data()
                 return True
         return False
@@ -267,93 +307,53 @@ class TurboNotes:
         """Display the main dashboard with tasks and notes"""
         self.console.clear()
 
-        # ASCII Art Banner
-        ascii_art = """
-╔══════════════════════════════════════════════════════════════╗
-║                                                              ║
-║    ████████╗██╗   ██╗██████╗ ██████╗  ██████╗             ║
-║    ╚══██╔══╝██║   ██║██╔══██╗██╔══██╗██╔═══██╗             ║
-║       ██║   ██║   ██║██████╔╝██████╔╝██║   ██║             ║
-║       ██║   ██║   ██║██╔══██╗██╔══██╗██║   ██║             ║
-║       ██║   ╚██████╔╝██████╔╝██║  ██║╚██████╔╝             ║
-║       ╚═╝    ╚═════╝ ╚═════╝ ╚═╝  ╚═╝ ╚═════╝              ║
-║                                                              ║
-║                    ███╗   ██╗ ██████╗ ████████╗███████╗     ║
-║                    ████╗  ██║██╔═══██╗╚══██╔══╝██╔════╝     ║
-║                    ██╔██╗ ██║██║   ██║   ██║   █████╗       ║
-║                    ██║╚██╗██║██║   ██║   ██║   ██╔══╝       ║
-║                    ██║ ╚████║╚██████╔╝   ██║   ███████╗     ║
-║                    ╚═╝  ╚═══╝ ╚═════╝    ╚═╝   ╚══════╝     ║
-║                                                              ║
-╚══════════════════════════════════════════════════════════════╝
-        """
+        # Simple header
+        self.console.print("[bold blue]🚀 Turbo Notes[/bold blue]")
+        self.console.print(f"[dim]{datetime.now().strftime('%A, %B %d, %Y')}[/dim]\n")
 
-        # Display ASCII art with blue color
-        self.console.print(ascii_art, style="bold blue")
-
-        # Date header
-        date_header = Panel(
-            f"[dim]{datetime.now().strftime('%A, %B %d, %Y')}[/dim]", style="blue"
-        )
-        self.console.print(date_header)
-
+        # Streak display
+        streak = self.data["streak"]["current"]
+        best_streak = self.data["streak"]["best"]
+        if streak > 0:
+            fire_emoji = "🔥" if streak >= 7 else "⚡" if streak >= 3 else "✨"
+            self.console.print(f"{fire_emoji} [bold green]{streak} day streak[/bold green] (best: {best_streak})")
+        
         # Initialize tasks if not exists
         if "tasks" not in self.data:
             self.data["tasks"] = []
 
         # Stats
-        stats_text = (
-            f"📝 {len(self.data['notes'])} Notes • ✅ {len(self.data['tasks'])} Tasks"
-        )
-        self.console.print(f"\n{stats_text}\n")
+        total_notes = len(self.data["notes"])
+        total_tasks = len(self.data["tasks"])
+        completed_tasks = len([t for t in self.data["tasks"] if t["completed"]])
+        
+        stats_text = f"📝 {total_notes} Notes • ✅ {completed_tasks}/{total_tasks} Tasks"
+        self.console.print(f"{stats_text}\n")
 
         # Overdue tasks
         overdue_tasks = self.get_overdue_tasks()
         if overdue_tasks:
-            self.console.print("[bold red]⚠️  OVERDUE TASKS:[/bold red]")
+            self.console.print("[bold red]⚠️  OVERDUE:[/bold red]")
             for task in overdue_tasks[:3]:
-                task_panel = Panel(
-                    f"[bold]{task['title']}[/bold]\n"
-                    f"{task.get('description', '')}\n"
-                    f"[red]Due: {task.get('due_date', 'No due date')[:10]}[/red]",
-                    title=f"Task #{task['id']} - {task['priority']} Priority",
-                    border_style="red",
-                    padding=(0, 1),
-                )
-                self.console.print(task_panel)
+                self.console.print(f"  • {task['title']}")
             self.console.print()
 
         # Today's tasks
         today_tasks = self.get_today_tasks()
         if today_tasks:
-            self.console.print("[bold yellow]📅 DUE TODAY:[/bold yellow]")
+            self.console.print("[bold yellow]📅 TODAY:[/bold yellow]")
             for task in today_tasks[:3]:
-                task_panel = Panel(
-                    f"[bold]{task['title']}[/bold]\n"
-                    f"{task.get('description', '')}\n"
-                    f"[yellow]Due: Today[/yellow]",
-                    title=f"Task #{task['id']} - {task['priority']} Priority",
-                    border_style="yellow",
-                    padding=(0, 1),
-                )
-                self.console.print(task_panel)
+                self.console.print(f"  • {task['title']}")
             self.console.print()
 
         # Recent notes
         if self.data["notes"]:
-            self.console.print("[bold green]📄 RECENT NOTES:[/bold green]")
+            self.console.print("[bold green]📄 RECENT:[/bold green]")
             recent_notes = sorted(
                 self.data["notes"], key=lambda x: x["modified"], reverse=True
             )[:3]
             for note in recent_notes:
-                note_panel = Panel(
-                    f"[bold]{note['title']}[/bold]\n\n{note['content']}",
-                    title=f"Note #{note['id']}",
-                    subtitle=note["created"][:10],
-                    border_style="green",
-                    padding=(0, 1),
-                )
-                self.console.print(note_panel)
+                self.console.print(f"  • {note['title']}")
             self.console.print()
 
     def interactive_menu(self):
