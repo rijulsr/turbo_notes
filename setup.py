@@ -35,14 +35,15 @@ def setup_autostart():
     autostart_dir = Path.home() / ".config" / "autostart"
     autostart_dir.mkdir(parents=True, exist_ok=True)
 
+    # Launch the new tray app (GUI) instead of a terminal dashboard
     desktop_entry_content = f"""[Desktop Entry]
 Type=Application
 Name=Turbo Notes
-Exec=gnome-terminal -- python3 {app_path} --dashboard
+Exec=python3 -m turbonotes.ui.qt.app
 Hidden=false
 NoDisplay=false
 X-GNOME-Autostart-enabled=true
-Comment=Turbo Notes - Quick task overview on login
+Comment=Turbo Notes - Tray app
 """
 
     desktop_file = autostart_dir / "turbo-notes.desktop"

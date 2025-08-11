@@ -37,18 +37,18 @@ A **secure**, **minimalist**, and **addictive** productivity application that co
 - Python 3.10+ 
 - Git
 
-### 📥 Installation
+### 📥 Installation (GUI + Tray)
 
 ```bash
 git clone https://github.com/rijulsr/turbo_notes.git
 cd turbo_notes
 pip install -r requirements.txt
-python turbo_notes.py
+python -m turbonotes.ui.qt.app  # starts the tray app
 ```
 
 ## 🎯 Usage
 
-### Quick Actions (New!)
+### Quick Actions (Terminal CLI)
 ```bash
 # Interactive mode with quick actions
 python turbo_notes.py
@@ -154,8 +154,8 @@ bandit -r turbo_notes.py
 
 ## 🛠️ Configuration
 
-### Terminal App Settings
-- **Password Protection**: Enable/disable encryption
+### App Settings
+- **Password Protection**: Enable/disable encryption (optional, via Settings)
 - **Categories**: Customize note categories
 - **Export**: JSON export functionality
 - **Statistics**: Usage tracking and streaks
