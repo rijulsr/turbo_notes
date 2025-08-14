@@ -1,0 +1,51 @@
+[package]
+name = "turbo-notes"
+version = "0.1.0"
+edition = "2021"
+authors = ["Your Name <your.email@example.com>"]
+description = "A minimalist cross-platform terminal-based notes application"
+license = "MIT"
+repository = "https://github.com/yourusername/turbo-notes"
+
+[[bin]]
+name = "turbo-notes"
+path = "src/main.rs"
+
+[[bin]]
+name = "turbo-widget"
+path = "src/widget.rs"
+
+[dependencies]
+# Terminal UI
+crossterm = "0.27"
+ratatui = "0.24"
+tokio = { version = "1.0", features = ["full"] }
+
+# File handling and serialization
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+chrono = { version = "0.4", features = ["serde"] }
+
+# Cross-platform functionality
+dirs = "5.0"
+clap = { version = "4.4", features = ["derive"] }
+
+# Auto-start functionality
+auto-launch = "0.5"
+
+# Error handling
+anyhow = "1.0"
+thiserror = "1.0"
+
+[target.'cfg(windows)'.dependencies]
+winapi = { version = "0.3", features = ["winuser", "shellapi"] }
+
+[target.'cfg(target_os = "macos")'.dependencies]
+cocoa = "0.25"
+objc = "0.2"
+
+[profile.release]
+opt-level = 3
+lto = true
+codegen-units = 1
+panic = "abort"
