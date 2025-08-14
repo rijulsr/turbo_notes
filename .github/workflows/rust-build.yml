@@ -1,0 +1,213 @@
+name: Build Rust Desktop
+
+on:
+  push:
+    branches: [ master, main, develop ]
+    paths:
+      - 'src/**'
+      - 'Cargo.toml'
+      - 'Cargo.lock'
+      - '.github/workflows/rust-build.yml'
+  pull_request:
+    branches: [ master, main ]
+    paths:
+      - 'src/**'
+      - 'Cargo.toml'
+      - 'Cargo.lock'
+  workflow_dispatch:
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  test:
+    name: Test Suite
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout sources
+        uses: actions/checkout@v4
+        
+      - name: Install stable toolchain
+        uses: actions-rs/toolchain@v1
+        with:
+          profile: minimal
+          toolchain: stable
+          override: true
+          
+      - name: Cache cargo registry
+        uses: actions/cache@v3
+        with:
+          path: ~/.cargo/registry
+          key: ${{ runner.os }}-cargo-registry-${{ hashFiles('**/Cargo.lock') }}
+          
+      - name: Cache cargo index
+        uses: actions/cache@v3
+        with:
+          path: ~/.cargo/git
+          key: ${{ runner.os }}-cargo-index-${{ hashFiles('**/Cargo.lock') }}
+          
+      - name: Cache cargo build
+        uses: actions/cache@v3
+        with:
+          path: target
+          key: ${{ runner.os }}-cargo-build-target-${{ hashFiles('**/Cargo.lock') }}
+          
+      - name: Run cargo test
+        uses: actions-rs/cargo@v1
+        with:
+          command: test
+          
+      - name: Run cargo clippy
+        uses: actions-rs/cargo@v1
+        with:
+          command: clippy
+          args: -- -D warnings
+
+  build:
+    name: Build Release
+    needs: test
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+        include:
+          - os: ubuntu-latest
+            target: x86_64-unknown-linux-gnu
+            artifact_name: turbo-notes-linux
+            asset_name: turbo-notes-linux-x86_64
+          - os: windows-latest
+            target: x86_64-pc-windows-msvc
+            artifact_name: turbo-notes-windows.exe
+            asset_name: turbo-notes-windows-x86_64.exe
+          - os: macos-latest
+            target: x86_64-apple-darwin
+            artifact_name: turbo-notes-macos
+            asset_name: turbo-notes-macos-x86_64
+            
+    runs-on: ${{ matrix.os }}
+    
+    steps:
+      - name: Checkout sources
+        uses: actions/checkout@v4
+        
+      - name: Install stable toolchain
+        uses: actions-rs/toolchain@v1
+        with:
+          profile: minimal
+          toolchain: stable
+          override: true
+          target: ${{ matrix.target }}
+          
+      - name: Cache cargo registry
+        uses: actions/cache@v3
+        with:
+          path: ~/.cargo/registry
+          key: ${{ runner.os }}-cargo-registry-${{ hashFiles('**/Cargo.lock') }}
+          
+      - name: Cache cargo index
+        uses: actions/cache@v3
+        with:
+          path: ~/.cargo/git
+          key: ${{ runner.os }}-cargo-index-${{ hashFiles('**/Cargo.lock') }}
+          
+      - name: Cache cargo build
+        uses: actions/cache@v3
+        with:
+          path: target
+          key: ${{ runner.os }}-cargo-build-target-${{ hashFiles('**/Cargo.lock') }}
+          
+      - name: Build release binary
+        uses: actions-rs/cargo@v1
+        with:
+          command: build
+          args: --release --target ${{ matrix.target }}
+          
+      - name: Prepare artifacts
+        shell: bash
+        run: |
+          mkdir -p release
+          if [[ "${{ matrix.os }}" == "windows-latest" ]]; then
+            cp target/${{ matrix.target }}/release/turbo-notes.exe release/
+            cp target/${{ matrix.target }}/release/turbo-widget.exe release/
+          else
+            cp target/${{ matrix.target }}/release/turbo-notes release/
+            cp target/${{ matrix.target }}/release/turbo-widget release/
+          fi
+          cp README.md LICENSE release/
+          
+      - name: Create release archive
+        shell: bash
+        run: |
+          cd release
+          if [[ "${{ matrix.os }}" == "windows-latest" ]]; then
+            7z a ../${{ matrix.asset_name }}.zip *
+          else
+            tar -czf ../${{ matrix.asset_name }}.tar.gz *
+          fi
+          
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.asset_name }}
+          path: |
+            ${{ matrix.asset_name }}.tar.gz
+            ${{ matrix.asset_name }}.zip
+          retention-days: 30
+          
+  release:
+    name: Create Release
+    needs: build
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/master' && github.event_name == 'push'
+    
+    steps:
+      - name: Checkout sources
+        uses: actions/checkout@v4
+        
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+          
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: desktop-v${{ github.run_number }}
+          name: Turbo Notes Desktop v${{ github.run_number }}
+          body: |
+            🚀 **Turbo Notes Desktop Release**
+            
+            **Changes:**
+            - Built from commit: ${{ github.sha }}
+            - Build number: ${{ github.run_number }}
+            
+            **Downloads:**
+            - **Linux**: `turbo-notes-linux-x86_64.tar.gz`
+            - **Windows**: `turbo-notes-windows-x86_64.exe.zip`
+            - **macOS**: `turbo-notes-macos-x86_64.tar.gz`
+            
+            **Installation:**
+            1. Download the appropriate archive for your platform
+            2. Extract the files
+            3. Run `./install.sh` (Linux/macOS) or copy binaries to your PATH
+            4. Optional: Run `turbo-notes --setup-autostart` to enable auto-start
+            
+            **Features:**
+            - ✅ Cross-platform terminal application
+            - ✅ Auto-start on system boot
+            - ✅ Quick note widget
+            - ✅ Vim-like keyboard navigation
+            - ✅ Persistent storage
+            - ✅ Search functionality
+            
+            **Usage:**
+            ```bash
+            turbo-notes              # Main application
+            turbo-notes --widget     # Quick note widget
+            turbo-notes --help       # Show help
+            ```
+            
+          files: |
+            artifacts/**/*.tar.gz
+            artifacts/**/*.zip
+          draft: false
+          prerelease: false
