@@ -9,9 +9,31 @@ dist/
 build/
 
 # Capacitor
-android/
 ios/
 .capacitor/
+
+# Android build outputs
+android/app/build/
+android/.gradle/
+android/build/
+android/gradle/wrapper/gradle-wrapper.jar
+
+# Keep important Android files but exclude sensitive ones
+!android/
+!android/app/
+!android/app/src/
+!android/app/build.gradle
+!android/build.gradle
+!android/gradle.properties
+!android/gradlew*
+!android/settings.gradle
+!android/variables.gradle
+!android/capacitor.settings.gradle
+
+# Exclude keystores and secrets
+android/app/*.keystore
+android/app/*.jks
+android/local.properties
 
 # IDE
 .vscode/

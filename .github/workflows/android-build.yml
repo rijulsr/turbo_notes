@@ -93,6 +93,12 @@ jobs:
         npx cap add android
         npx cap sync android
         
+    - name: Create debug keystore
+      working-directory: ${{ env.ANDROID_APP_PATH }}
+      run: |
+        cd android/app
+        keytool -genkey -v -keystore debug.keystore -alias androiddebugkey -keyalg RSA -keysize 2048 -validity 10000 -storepass android -keypass android -dname "CN=Android Debug,O=Android,C=US"
+        
     - name: Set up keystore for release build
       if: github.event.inputs.release_type == 'release' || github.ref == 'refs/heads/master'
       working-directory: ${{ env.ANDROID_APP_PATH }}
@@ -123,12 +129,30 @@ jobs:
       run: |
         if [ "${{ github.event.inputs.release_type }}" = "release" ] || [ "${{ github.ref }}" = "refs/heads/master" ]; then
           APK_PATH=$(find android/app/build/outputs/apk/release -name "*.apk" | head -1)
-          APK_NAME="turbo-notes-release.apk"
+          APK_NAME="turbo-notes-v${{ github.run_number }}-release.apk"
         else
           APK_PATH=$(find android/app/build/outputs/apk/debug -name "*.apk" | head -1)
-          APK_NAME="turbo-notes-debug.apk"
+          APK_NAME="turbo-notes-v${{ github.run_number }}-debug.apk"
         fi
-        echo "apk_path=$APK_PATH" >> $GITHUB_OUTPUT
+        
+        # Verify APK exists and is valid
+        if [ ! -f "$APK_PATH" ]; then
+          echo "❌ APK not found at: $APK_PATH"
+          exit 1
+        fi
+        
+        # Check APK size (should be > 1MB)
+        APK_SIZE_BYTES=$(stat -c%s "$APK_PATH")
+        if [ $APK_SIZE_BYTES -lt 1048576 ]; then
+          echo "❌ APK too small: $APK_SIZE_BYTES bytes"
+          exit 1
+        fi
+        
+        # Rename APK for better identification
+        APK_DIR=$(dirname "$APK_PATH")
+        cp "$APK_PATH" "$APK_DIR/$APK_NAME"
+        
+        echo "apk_path=$APK_DIR/$APK_NAME" >> $GITHUB_OUTPUT
         echo "apk_name=$APK_NAME" >> $GITHUB_OUTPUT
         
     - name: Upload APK as artifact
