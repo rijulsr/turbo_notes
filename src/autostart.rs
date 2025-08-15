@@ -5,6 +5,15 @@ use std::env;
 pub fn setup_autostart(enable: bool) -> Result<()> {
     let exe_path = env::current_exe()?;
     
+    #[cfg(target_os = "macos")]
+    let auto_launch = AutoLaunch::new(
+        "turbo-notes",
+        &exe_path.to_string_lossy(),
+        false, // hidden = false (not hidden)
+        &["--startup"],
+    );
+    
+    #[cfg(not(target_os = "macos"))]
     let auto_launch = AutoLaunch::new(
         "turbo-notes",
         &exe_path.to_string_lossy(),
@@ -25,6 +34,15 @@ pub fn setup_autostart(enable: bool) -> Result<()> {
 pub fn is_autostart_enabled() -> Result<bool> {
     let exe_path = env::current_exe()?;
     
+    #[cfg(target_os = "macos")]
+    let auto_launch = AutoLaunch::new(
+        "turbo-notes",
+        &exe_path.to_string_lossy(),
+        false, // hidden = false (not hidden)
+        &["--startup"],
+    );
+    
+    #[cfg(not(target_os = "macos"))]
     let auto_launch = AutoLaunch::new(
         "turbo-notes",
         &exe_path.to_string_lossy(),
