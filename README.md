@@ -23,7 +23,6 @@ A minimalist, cross-platform, terminal-based note-taking application written in 
 # Clone the repository
 git clone https://github.com/yourusername/turbo-notes.git
 cd turbo-notes
-
 # Build and install
 cargo build --release
 cargo install --path .
