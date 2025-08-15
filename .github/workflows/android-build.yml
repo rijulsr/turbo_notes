@@ -36,8 +36,7 @@ jobs:
       uses: actions/setup-node@v4
       with:
         node-version: '18'
-        cache: 'npm'
-        cache-dependency-path: ${{ env.ANDROID_APP_PATH }}/package-lock.json
+
         
     - name: Setup Java JDK
       uses: actions/setup-java@v4
@@ -50,8 +49,8 @@ jobs:
       
     - name: Install Android SDK components
       run: |
+        yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --licenses
         $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --install "platform-tools" "platforms;android-33" "build-tools;33.0.2"
-        $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --licenses
       
     - name: Cache Gradle dependencies
       uses: actions/cache@v3
@@ -65,11 +64,18 @@ jobs:
           
     - name: Install npm dependencies
       working-directory: ${{ env.ANDROID_APP_PATH }}
-      run: npm ci
+      run: |
+        if [ -f package-lock.json ]; then
+          npm ci
+        else
+          npm install
+        fi
       
     - name: Install Capacitor CLI
       working-directory: ${{ env.ANDROID_APP_PATH }}
-      run: npm install -g @capacitor/cli
+      run: |
+        npm install @capacitor/cli
+        export PATH="$PATH:$(pwd)/node_modules/.bin"
       
     - name: Build web assets
       working-directory: ${{ env.ANDROID_APP_PATH }}
@@ -180,12 +186,16 @@ jobs:
       uses: actions/setup-node@v4
       with:
         node-version: '18'
-        cache: 'npm'
-        cache-dependency-path: ${{ env.ANDROID_APP_PATH }}/package-lock.json
+
         
     - name: Install dependencies
       working-directory: ${{ env.ANDROID_APP_PATH }}
-      run: npm ci
+      run: |
+        if [ -f package-lock.json ]; then
+          npm ci
+        else
+          npm install
+        fi
       
     - name: Run linting
       working-directory: ${{ env.ANDROID_APP_PATH }}
