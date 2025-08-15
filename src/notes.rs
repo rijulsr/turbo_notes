@@ -158,6 +158,10 @@ impl NotesManager {
             .collect()
     }
 
+    pub fn get_notes_directory(&self) -> &PathBuf {
+        &self.notes_dir
+    }
+
     pub fn export_notes(&self, format: ExportFormat) -> Result<String> {
         match format {
             ExportFormat::Json => Ok(serde_json::to_string_pretty(&self.notes)?),

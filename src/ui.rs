@@ -16,6 +16,12 @@ pub struct UI {
     pub list_state: ListState,
 }
 
+impl Default for UI {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl UI {
     pub fn new() -> Self {
         Self {
