@@ -1,4 +1,4 @@
-import { defineConfig } from 'vite';
+import { defineConfig } from 'vite'
 
 export default defineConfig({
   build: {
@@ -15,8 +15,5 @@ export default defineConfig({
   server: {
     port: 3000,
     host: true
-  },
-  optimizeDeps: {
-    include: ['@capacitor/core', '@capacitor/app']
   }
-});
+})

@@ -21,6 +21,12 @@ on:
         - debug
         - release
 
+# Add permissions for GitHub token
+permissions:
+  contents: write
+  packages: write
+  actions: read
+
 env:
   ANDROID_APP_PATH: ./TurboNotesAndroid
 
@@ -142,37 +148,13 @@ jobs:
         echo "📦 APK Size: $APK_SIZE"
         echo "📍 APK Path: $APK_PATH"
         
-    - name: Create Release
-      if: github.event.inputs.release_type == 'release' || (github.ref == 'refs/heads/master' && github.event_name == 'push')
-      uses: softprops/action-gh-release@v1
-      with:
-        tag_name: android-v${{ github.run_number }}
-        name: Turbo Notes Android v${{ github.run_number }}
-        body: |
-          🚀 **Turbo Notes Android Release**
-          
-          **Changes:**
-          - Built from commit: ${{ github.sha }}
-          - Build number: ${{ github.run_number }}
-          - Built on: ${{ github.run_date }}
-          
-          **Installation:**
-          1. Download the APK file below
-          2. Enable "Unknown sources" in Android settings
-          3. Install the APK
-          4. Open Turbo Notes and start taking notes!
-          
-          **Features:**
-          - ✅ Minimalist note-taking interface
-          - ✅ Quick note capture
-          - ✅ Offline storage
-          - ✅ Dark theme
-          - ✅ Fast and responsive
-          
-        files: |
-          ${{ env.ANDROID_APP_PATH }}/${{ steps.find_apk.outputs.apk_path }}
-        draft: false
-        prerelease: false
+    - name: Upload APK Summary
+      run: |
+        echo "🎉 APK Build Completed Successfully!"
+        echo "📱 APK Name: ${{ steps.find_apk.outputs.apk_name }}"
+        echo "📍 APK Location: ${{ steps.find_apk.outputs.apk_path }}"
+        echo "📦 Download from: GitHub Actions > This workflow run > Artifacts"
+        echo "🚀 Ready for installation on Android devices!"
         
   test-android:
     runs-on: ubuntu-latest

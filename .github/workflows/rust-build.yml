@@ -16,6 +16,12 @@ on:
       - 'Cargo.lock'
   workflow_dispatch:
 
+# Add permissions for GitHub token
+permissions:
+  contents: write
+  packages: write
+  actions: read
+
 env:
   CARGO_TERM_COLOR: always
 
@@ -169,7 +175,9 @@ jobs:
           path: artifacts
           
       - name: Create Release
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           tag_name: desktop-v${{ github.run_number }}
           name: Turbo Notes Desktop v${{ github.run_number }}
