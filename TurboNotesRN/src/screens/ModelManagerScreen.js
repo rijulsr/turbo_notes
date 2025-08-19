@@ -213,6 +213,13 @@ const ModelManagerScreen = () => {
               {model.isVision ? '🔍 Vision + Text' : '📝 Text Only'}
             </Text>
           </View>
+
+          <View style={styles.detailRow}>
+            <Text style={[styles.detailLabel, { color: theme.textSecondary }]}>Category:</Text>
+            <Text style={[styles.detailValue, { color: theme.text }]}>
+              {model.category || 'General'}
+            </Text>
+          </View>
         </View>
 
         {/* Capabilities */}
@@ -338,19 +345,22 @@ const ModelManagerScreen = () => {
         {/* Info Section */}
         <View style={[styles.infoSection, { backgroundColor: theme.surface, borderColor: theme.border }]}>
           <Text style={[styles.infoTitle, { color: theme.text }]}>
-            🎯 Recommended: SmolVLM2-500M-Instruct
+            🚀 12 AI Models Available
           </Text>
           <Text style={[styles.infoText, { color: theme.textSecondary }]}>
-            • Extract text from images and photos
+            🔥 <Text style={{ fontWeight: 'bold' }}>SmolVLM2:</Text> Best for image text extraction
           </Text>
           <Text style={[styles.infoText, { color: theme.textSecondary }]}>
-            • Analyze screenshots and documents
+            ⚡ <Text style={{ fontWeight: 'bold' }}>TinyLlama:</Text> Fastest responses (650MB)
           </Text>
           <Text style={[styles.infoText, { color: theme.textSecondary }]}>
-            • OCR capabilities for note-taking
+            💻 <Text style={{ fontWeight: 'bold' }}>CodeQwen:</Text> Programming & code help
           </Text>
           <Text style={[styles.infoText, { color: theme.textSecondary }]}>
-            • Compact size optimized for mobile
+            🌍 <Text style={{ fontWeight: 'bold' }}>Aya 23:</Text> 23+ languages support
+          </Text>
+          <Text style={[styles.infoText, { color: theme.textSecondary }]}>
+            🎯 <Text style={{ fontWeight: 'bold' }}>Mistral 7B:</Text> Highest quality output
           </Text>
         </View>
       </ScrollView>
