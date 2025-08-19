@@ -33,3 +33,42 @@ config.json
 *.dll
 *.so
 *.dylib
+
+# Node / React Native
+node_modules/
+**/node_modules/
+npm-debug.log*
+yarn-error.log
+*.log
+
+# React Native bundles
+**/index.android.bundle
+**/index.ios.bundle
+**/*.map
+
+# Android outputs
+**/android/.gradle/
+**/android/build/
+**/android/**/intermediates/**
+**/android/**/generated/**
+**/android/**/outputs/**
+**/android/local.properties
+**/android/app/debug.keystore
+
+# iOS outputs
+**/ios/build/
+**/ios/DerivedData/
+**/ios/Pods/
+**/*.xcworkspace
+**/*.xcuserdatad
+**/*.xcuserstate
+
+# APKs and large binaries
+*.apk
+*.aab
+*.ipa
+
+# Editors
+.vscode/
+.idea/
+*.iml
