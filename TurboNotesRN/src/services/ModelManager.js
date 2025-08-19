@@ -12,8 +12,8 @@ class ModelManager {
         description: '🔥 RECOMMENDED: Compact vision-language model for text extraction from images',
         size: 350, // MB
         capabilities: ['vision', 'text-extraction', 'ocr', 'image-analysis'],
-        downloadUrl: 'https://huggingface.co/HuggingFaceTB/SmolVLM2-500M-Instruct-GGUF/resolve/main/smolvlm2-500m-instruct-q4_k_m.gguf',
-        fileName: 'smolvlm2-500m-instruct-q4_k_m.gguf',
+        downloadUrl: 'https://huggingface.co/bartowski/SmolVLM2-500M-Instruct-GGUF/resolve/main/SmolVLM2-500M-Instruct-Q4_K_M.gguf',
+        fileName: 'SmolVLM2-500M-Instruct-Q4_K_M.gguf',
         isVision: true,
         contextLength: 8192,
         category: 'Vision',
@@ -24,8 +24,8 @@ class ModelManager {
         description: 'Advanced vision model with better image understanding and reasoning',
         size: 2200, // MB
         capabilities: ['vision', 'image-analysis', 'visual-qa', 'scene-description'],
-        downloadUrl: 'https://huggingface.co/xtuner/llava-phi-3-mini-gguf/resolve/main/llava-phi-3-mini-q4_k_m.gguf',
-        fileName: 'llava-phi-3-mini-q4_k_m.gguf',
+        downloadUrl: 'https://huggingface.co/bartowski/llava-phi-3-mini-gguf/resolve/main/llava-phi-3-mini-Q4_K_M.gguf',
+        fileName: 'llava-phi-3-mini-Q4_K_M.gguf',
         isVision: true,
         contextLength: 4096,
         category: 'Vision',
@@ -64,8 +64,8 @@ class ModelManager {
         description: 'Google\'s balanced model for note enhancement and summarization',
         size: 1400, // MB
         capabilities: ['text-generation', 'summarization', 'enhancement', 'categorization'],
-        downloadUrl: 'https://huggingface.co/google/gemma-2b-it-GGUF/resolve/main/gemma-2b-it.q4_0.gguf',
-        fileName: 'gemma-2b-it.q4_0.gguf',
+        downloadUrl: 'https://huggingface.co/bartowski/gemma-2b-it-GGUF/resolve/main/gemma-2b-it-Q4_K_M.gguf',
+        fileName: 'gemma-2b-it-Q4_K_M.gguf',
         isVision: false,
         contextLength: 8192,
         category: 'Balanced',
@@ -76,8 +76,8 @@ class ModelManager {
         description: 'Microsoft\'s efficient model optimized for mobile devices',
         size: 2100, // MB
         capabilities: ['text-generation', 'reasoning', 'coding', 'qa'],
-        downloadUrl: 'https://huggingface.co/microsoft/Phi-3-mini-4k-instruct-gguf/resolve/main/Phi-3-mini-4k-instruct-q4.gguf',
-        fileName: 'Phi-3-mini-4k-instruct-q4.gguf',
+        downloadUrl: 'https://huggingface.co/bartowski/Phi-3-mini-4k-instruct-GGUF/resolve/main/Phi-3-mini-4k-instruct-Q4_K_M.gguf',
+        fileName: 'Phi-3-mini-4k-instruct-Q4_K_M.gguf',
         isVision: false,
         contextLength: 4096,
         category: 'Balanced',
@@ -102,8 +102,8 @@ class ModelManager {
         description: '💻 CODE SPECIALIST: Optimized for programming, debugging, and code explanation',
         size: 950, // MB
         capabilities: ['coding', 'debugging', 'code-explanation', 'programming-help'],
-        downloadUrl: 'https://huggingface.co/Qwen/CodeQwen1.5-7B-Chat-GGUF/resolve/main/codeqwen-1_5b-chat-q4_k_m.gguf',
-        fileName: 'codeqwen-1_5b-chat-q4_k_m.gguf',
+        downloadUrl: 'https://huggingface.co/bartowski/CodeQwen1.5-7B-Chat-GGUF/resolve/main/CodeQwen1.5-7B-Chat-Q4_K_M.gguf',
+        fileName: 'CodeQwen1.5-7B-Chat-Q4_K_M.gguf',
         isVision: false,
         contextLength: 65536,
         category: 'Specialized',
@@ -140,8 +140,8 @@ class ModelManager {
         description: '🌍 MULTILINGUAL: Supports 23+ languages for global note-taking',
         size: 4500, // MB
         capabilities: ['multilingual', 'translation', 'cross-language', 'global-support'],
-        downloadUrl: 'https://huggingface.co/CohereForAI/aya-23-8B-GGUF/resolve/main/aya-23-8b.q4_k_m.gguf',
-        fileName: 'aya-23-8b.q4_k_m.gguf',
+        downloadUrl: 'https://huggingface.co/bartowski/aya-23-8B-GGUF/resolve/main/aya-23-8B-Q4_K_M.gguf',
+        fileName: 'aya-23-8B-Q4_K_M.gguf',
         isVision: false,
         contextLength: 8192,
         category: 'Multilingual',
@@ -259,7 +259,15 @@ class ModelManager {
         
         return filePath;
       } else {
-        throw new Error(`Download failed with status ${downloadResult.statusCode}`);
+        let errorMessage = `Download failed with HTTP status ${downloadResult.statusCode}`;
+        if (downloadResult.statusCode === 401) {
+          errorMessage = 'Download failed: Access denied (401). The model URL may be incorrect or the file may have moved.';
+        } else if (downloadResult.statusCode === 404) {
+          errorMessage = 'Download failed: Model not found (404). The file may have been moved or deleted.';
+        } else if (downloadResult.statusCode === 403) {
+          errorMessage = 'Download failed: Access forbidden (403). You may need authentication to download this model.';
+        }
+        throw new Error(errorMessage);
       }
     } catch (error) {
       console.error(`❌ Failed to download ${model.name}:`, error);
