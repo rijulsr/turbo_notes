@@ -1,6 +1,6 @@
 import RNFS from 'react-native-fs';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { LlamaContext } from 'llama.rn';
+import { initLlama, LlamaContext } from 'llama.rn';
 
 class ModelManager {
   constructor() {
@@ -152,6 +152,7 @@ class ModelManager {
     this.activeContext = null;
     this.modelListeners = [];
     this.modelsDir = `${RNFS.DocumentDirectoryPath}/models`;
+    this.llamaInitialized = false;
     
     this.initializeModelsDirectory();
   }
@@ -307,23 +308,29 @@ class ModelManager {
     console.log(`📍 Path: ${filePath}`);
 
     try {
+      // Initialize llama.rn if not already done
+      if (!this.llamaInitialized) {
+        await initLlama();
+        this.llamaInitialized = true;
+        console.log('🚀 Llama.rn initialized successfully');
+      }
+
       // Configure model parameters based on device capabilities
       const modelConfig = {
-        modelPath: filePath,
-        contextSize: Math.min(model.contextLength, 4096), // Limit context for mobile
-        batchSize: 512,
-        threads: -1, // Use all available threads
-        gpuLayers: 0, // Start with CPU, can be increased based on device
-        verbose: true,
+        model: filePath,
+        n_ctx: Math.min(model.contextLength, 4096), // Context size
+        n_batch: 512,
+        n_threads: -1, // Use all available threads
+        n_gpu_layers: 0, // Start with CPU
+        verbose_prompt: true,
       };
 
       // Special configuration for vision models
       if (model.isVision) {
-        modelConfig.multimodal = true;
-        modelConfig.contextSize = Math.min(model.contextLength, 2048); // Smaller context for vision
+        modelConfig.n_ctx = Math.min(model.contextLength, 2048); // Smaller context for vision
       }
 
-      this.activeContext = await LlamaContext.initFromFile(filePath, modelConfig);
+      this.activeContext = await LlamaContext.init(modelConfig);
       this.activeModel = model;
       
       console.log(`✅ Model ${model.name} loaded successfully`);
@@ -406,8 +413,7 @@ Please extract all the text you can see in this image. Be accurate and preserve 
 <|im_end|>
 <|im_start|>assistant`;
 
-      const result = await this.activeContext.completion({
-        prompt: prompt,
+      const result = await this.activeContext.completion(prompt, {
         image: imageUri,
         n_predict: 512,
         temperature: 0.1, // Low temperature for accuracy
@@ -415,7 +421,7 @@ Please extract all the text you can see in this image. Be accurate and preserve 
         stop: ['<|im_end|>'],
       });
 
-      const extractedText = result.text.trim();
+      const extractedText = result.trim();
       console.log('✅ Text extraction completed');
       
       return {
@@ -443,15 +449,14 @@ Please extract all the text you can see in this image. Be accurate and preserve 
     } = options;
 
     try {
-      const result = await this.activeContext.completion({
-        prompt: prompt,
+      const result = await this.activeContext.completion(prompt, {
         n_predict: maxTokens,
         temperature: temperature,
         top_p: topP,
         stop: stopWords,
       });
 
-      return result.text.trim();
+      return result.trim();
     } catch (error) {
       console.error('❌ Text generation failed:', error);
       throw error;
