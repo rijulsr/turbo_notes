@@ -1,9 +1,16 @@
-import RNFS from 'react-native-fs';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { initLlama, LlamaContext } from 'llama.rn';
+/**
+ * Legacy ModelManager Bridge
+ * Provides backward compatibility while transitioning to EnhancedModelManager
+ */
+
+import { enhancedModelManager } from './EnhancedModelManager';
 
 class ModelManager {
   constructor() {
+    // Bridge to enhanced model manager
+    this.enhancedManager = enhancedModelManager;
+    
+    // Legacy model definitions for backward compatibility
     this.models = [
       // Vision Models - Best for image analysis and OCR
       {
@@ -169,225 +176,85 @@ class ModelManager {
     }
   }
 
+  // Bridge methods to enhanced model manager
   async getAvailableModels() {
-    const modelsWithStatus = await Promise.all(
-      this.models.map(async (model) => {
-        const filePath = `${this.modelsDir}/${model.fileName}`;
-        const isDownloaded = await RNFS.exists(filePath);
-        let downloadedSize = 0;
-        
-        if (isDownloaded) {
-          try {
-            const stat = await RNFS.stat(filePath);
-            downloadedSize = Math.round(stat.size / 1024 / 1024); // MB
-          } catch (error) {
-            console.error('Error getting file size:', error);
-          }
-        }
-        
-        return {
-          ...model,
-          isDownloaded,
-          downloadedSize,
-          filePath,
-          isActive: this.activeModel?.id === model.id
-        };
-      })
-    );
-    
-    return modelsWithStatus;
+    try {
+      const recommended = await this.enhancedManager.getRecommendedModels();
+      const allModels = Object.values(recommended).flat();
+      
+      // Convert to legacy format for backward compatibility
+      return allModels.map(model => ({
+        ...model,
+        isActive: model.isActive || false
+      }));
+    } catch (error) {
+      console.error('Failed to get available models:', error);
+      return [];
+    }
   }
 
   async downloadModel(modelId, onProgress) {
-    const model = this.models.find(m => m.id === modelId);
-    if (!model) {
-      throw new Error(`Model ${modelId} not found`);
-    }
-
-    const filePath = `${this.modelsDir}/${model.fileName}`;
-    
-    // Check if already downloaded
-    const exists = await RNFS.exists(filePath);
-    if (exists) {
-      console.log(`✅ Model ${model.name} already downloaded`);
-      return filePath;
-    }
-
-    console.log(`📥 Starting download: ${model.name}`);
-    console.log(`📍 URL: ${model.downloadUrl}`);
-    console.log(`💾 Size: ${model.size}MB`);
-
     try {
-      const downloadResult = await RNFS.downloadFile({
-        fromUrl: model.downloadUrl,
-        toFile: filePath,
-        headers: {
-          'User-Agent': 'TurboNotes/1.0 (React Native)',
-        },
-        progressInterval: 1000,
-        progress: (res) => {
-          const progress = (res.bytesWritten / res.contentLength) * 100;
-          const downloadedMB = Math.round(res.bytesWritten / 1024 / 1024);
-          const totalMB = Math.round(res.contentLength / 1024 / 1024);
-          
-          if (onProgress) {
-            onProgress({
-              progress: Math.round(progress),
-              downloadedMB,
-              totalMB,
-              speed: res.bytesWritten / (Date.now() - res.jobId) * 1000 // bytes per second
-            });
-          }
-          
-          console.log(`📊 Download progress: ${Math.round(progress)}% (${downloadedMB}/${totalMB}MB)`);
+      // Bridge to enhanced model manager
+      const progressCallback = (progress) => {
+        if (onProgress) {
+          onProgress({
+            progress: progress.progress,
+            downloadedMB: progress.downloadedMB,
+            totalMB: progress.totalMB,
+            speed: progress.speed
+          });
         }
-      }).promise;
+      };
 
-      if (downloadResult.statusCode === 200) {
-        console.log(`✅ Model ${model.name} downloaded successfully`);
-        
-        // Verify file size
-        const stat = await RNFS.stat(filePath);
-        const actualSizeMB = Math.round(stat.size / 1024 / 1024);
-        console.log(`📏 Downloaded size: ${actualSizeMB}MB`);
-        
-        // Save download info
-        await AsyncStorage.setItem(`model_${modelId}_downloaded`, JSON.stringify({
-          downloadedAt: new Date().toISOString(),
-          size: actualSizeMB,
-          path: filePath
-        }));
-        
-        return filePath;
-      } else {
-        let errorMessage = `Download failed with HTTP status ${downloadResult.statusCode}`;
-        if (downloadResult.statusCode === 401) {
-          errorMessage = 'Download failed: Access denied (401). The model URL may be incorrect or the file may have moved.';
-        } else if (downloadResult.statusCode === 404) {
-          errorMessage = 'Download failed: Model not found (404). The file may have been moved or deleted.';
-        } else if (downloadResult.statusCode === 403) {
-          errorMessage = 'Download failed: Access forbidden (403). You may need authentication to download this model.';
-        }
-        throw new Error(errorMessage);
-      }
+      const filePath = await this.enhancedManager.downloadModel(modelId, progressCallback);
+      return filePath;
     } catch (error) {
-      console.error(`❌ Failed to download ${model.name}:`, error);
-      
-      // Clean up partial download
-      const exists = await RNFS.exists(filePath);
-      if (exists) {
-        await RNFS.unlink(filePath);
-      }
-      
+      console.error(`❌ Download failed for ${modelId}:`, error);
       throw error;
     }
   }
 
   async loadModel(modelId) {
-    const model = this.models.find(m => m.id === modelId);
-    if (!model) {
-      throw new Error(`Model ${modelId} not found`);
-    }
-
-    const filePath = `${this.modelsDir}/${model.fileName}`;
-    const exists = await RNFS.exists(filePath);
-    
-    if (!exists) {
-      throw new Error(`Model ${model.name} not downloaded. Please download it first.`);
-    }
-
-    // Unload current model if any
-    if (this.activeContext) {
-      console.log('🔄 Unloading current model...');
-      await this.activeContext.release();
-      this.activeContext = null;
-      this.activeModel = null;
-    }
-
-    console.log(`🔄 Loading model: ${model.name}`);
-    console.log(`📍 Path: ${filePath}`);
-
     try {
-      // Initialize llama.rn if not already done
-      if (!this.llamaInitialized) {
-        await initLlama();
-        this.llamaInitialized = true;
-        console.log('🚀 Llama.rn initialized successfully');
-      }
-
-      // Configure model parameters based on device capabilities
-      const modelConfig = {
-        model: filePath,
-        n_ctx: Math.min(model.contextLength, 4096), // Context size
-        n_batch: 512,
-        n_threads: -1, // Use all available threads
-        n_gpu_layers: 0, // Start with CPU
-        verbose_prompt: true,
-      };
-
-      // Special configuration for vision models
-      if (model.isVision) {
-        modelConfig.n_ctx = Math.min(model.contextLength, 2048); // Smaller context for vision
-      }
-
-      this.activeContext = await LlamaContext.init(modelConfig);
-      this.activeModel = model;
+      // Bridge to enhanced model manager
+      const context = await this.enhancedManager.loadModel(modelId);
       
-      console.log(`✅ Model ${model.name} loaded successfully`);
+      // Update legacy references for backward compatibility
+      this.activeContext = context;
+      this.activeModel = this.enhancedManager.getActiveModel();
       
-      // Save active model info
-      await AsyncStorage.setItem('active_model', JSON.stringify({
-        id: model.id,
-        loadedAt: new Date().toISOString()
-      }));
-      
-      // Notify listeners
-      this.notifyModelLoaded(model);
-      
-      return this.activeContext;
+      return context;
     } catch (error) {
-      console.error(`❌ Failed to load model ${model.name}:`, error);
-      this.activeContext = null;
-      this.activeModel = null;
+      console.error(`❌ Failed to load model ${modelId}:`, error);
       throw error;
     }
   }
 
   async unloadModel() {
-    if (this.activeContext) {
-      console.log(`🔄 Unloading model: ${this.activeModel?.name}`);
-      await this.activeContext.release();
+    try {
+      // Bridge to enhanced model manager
+      await this.enhancedManager.unloadModel();
+      
+      // Clear legacy references
       this.activeContext = null;
       this.activeModel = null;
       
-      await AsyncStorage.removeItem('active_model');
       console.log('✅ Model unloaded');
-      
-      // Notify listeners
-      this.notifyModelUnloaded();
+    } catch (error) {
+      console.error('❌ Failed to unload model:', error);
+      throw error;
     }
   }
 
   async deleteModel(modelId) {
-    const model = this.models.find(m => m.id === modelId);
-    if (!model) {
-      throw new Error(`Model ${modelId} not found`);
-    }
-
-    // Unload if currently active
-    if (this.activeModel?.id === modelId) {
-      await this.unloadModel();
-    }
-
-    const filePath = `${this.modelsDir}/${model.fileName}`;
-    const exists = await RNFS.exists(filePath);
-    
-    if (exists) {
-      await RNFS.unlink(filePath);
-      console.log(`🗑️ Deleted model: ${model.name}`);
-      
-      // Remove download info
-      await AsyncStorage.removeItem(`model_${modelId}_downloaded`);
+    try {
+      // Bridge to enhanced model manager
+      await this.enhancedManager.deleteModel(modelId);
+      console.log(`🗑️ Deleted model: ${modelId}`);
+    } catch (error) {
+      console.error(`❌ Failed to delete model ${modelId}:`, error);
+      throw error;
     }
   }
 
@@ -437,26 +304,9 @@ Please extract all the text you can see in this image. Be accurate and preserve 
 
   // Enhanced text generation for note enhancement
   async generateText(prompt, options = {}) {
-    if (!this.activeContext) {
-      throw new Error('No model loaded. Please load a model first.');
-    }
-
-    const {
-      maxTokens = 512,
-      temperature = 0.7,
-      topP = 0.9,
-      stopWords = [],
-    } = options;
-
     try {
-      const result = await this.activeContext.completion(prompt, {
-        n_predict: maxTokens,
-        temperature: temperature,
-        top_p: topP,
-        stop: stopWords,
-      });
-
-      return result.trim();
+      // Bridge to enhanced model manager
+      return await this.enhancedManager.generateText(prompt, options);
     } catch (error) {
       console.error('❌ Text generation failed:', error);
       throw error;
@@ -488,25 +338,18 @@ Please extract all the text you can see in this image. Be accurate and preserve 
     });
   }
 
-  // Utility methods
+  // Utility methods - bridge to enhanced model manager
   getActiveModel() {
-    return this.activeModel;
+    return this.enhancedManager.getActiveModel();
   }
 
   isModelLoaded() {
-    return this.activeContext !== null;
+    return this.enhancedManager.isModelLoaded();
   }
 
   async getStorageInfo() {
     try {
-      const fsInfo = await RNFS.getFSInfo();
-      const modelsSize = await this.calculateModelsSize();
-      
-      return {
-        totalSpace: Math.round(fsInfo.totalSpace / 1024 / 1024 / 1024 * 100) / 100, // GB
-        freeSpace: Math.round(fsInfo.freeSpace / 1024 / 1024 / 1024 * 100) / 100, // GB
-        modelsSize: Math.round(modelsSize / 1024 / 1024), // MB
-      };
+      return await this.enhancedManager.getStorageInfo();
     } catch (error) {
       console.error('Error getting storage info:', error);
       return null;

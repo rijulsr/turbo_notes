@@ -31,3 +31,4 @@ export class NoteModel extends Model {
   @field('image_url') imageUrl?: string;
   @json('attachments', (attachments: string[]) => attachments) attachments!: string[];
 }
+

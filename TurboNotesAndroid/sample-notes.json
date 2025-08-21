@@ -1,0 +1,20 @@
+[
+  {
+    "id": "1701234567890",
+    "content": "Welcome to Turbo Notes!\n\nThis is a sample note imported from JSON format. You can create, edit, and organize all your notes here.",
+    "createdAt": "2024-08-15T10:00:00.000Z",
+    "updatedAt": "2024-08-15T10:00:00.000Z"
+  },
+  {
+    "id": "1701234567891",
+    "content": "Meeting Notes - Project Alpha\n\n• Discussed timeline and milestones\n• Assigned tasks to team members\n• Next meeting scheduled for Friday",
+    "createdAt": "2024-08-15T11:30:00.000Z",
+    "updatedAt": "2024-08-15T11:30:00.000Z"
+  },
+  {
+    "id": "1701234567892",
+    "content": "Shopping List\n\n- Milk\n- Bread\n- Eggs\n- Coffee\n- Apples\n- Chicken",
+    "createdAt": "2024-08-15T12:15:00.000Z",
+    "updatedAt": "2024-08-15T12:15:00.000Z"
+  }
+]

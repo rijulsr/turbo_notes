@@ -58,9 +58,9 @@ class AIService {
       this.availableModels = [
         {
           id: 'gemma-2b-it',
-          name: 'Gemma 2B Instruct',
-          size: 1.4 * 1024 * 1024 * 1024, // 1.4GB
-          path: `${RNFS.DocumentDirectoryPath}/models/gemma-2b-it-q4_0.gguf`,
+          name: 'Gemma 2.2B Instruct',
+          size: 1.6 * 1024 * 1024 * 1024, // 1.6GB
+          path: `${RNFS.DocumentDirectoryPath}/models/gemma-2-2b-it-Q4_K_M.gguf`,
           isDownloaded: false,
           isLoaded: false,
           description: 'Fast, efficient model for note enhancement and summarization',
@@ -68,9 +68,9 @@ class AIService {
         },
         {
           id: 'llama3-8b-instruct',
-          name: 'Llama 3 8B Instruct',
-          size: 4.3 * 1024 * 1024 * 1024, // 4.3GB
-          path: `${RNFS.DocumentDirectoryPath}/models/llama3-8b-instruct-q4_0.gguf`,
+          name: 'Llama 3.1 8B Instruct',
+          size: 4.9 * 1024 * 1024 * 1024, // 4.9GB
+          path: `${RNFS.DocumentDirectoryPath}/models/Meta-Llama-3.1-8B-Instruct-Q4_K_M.gguf`,
           isDownloaded: false,
           isLoaded: false,
           description: 'Powerful model for complex reasoning and detailed analysis',
@@ -78,13 +78,13 @@ class AIService {
         },
         {
           id: 'phi3-mini',
-          name: 'Phi-3 Mini',
-          size: 2.1 * 1024 * 1024 * 1024, // 2.1GB
-          path: `${RNFS.DocumentDirectoryPath}/models/phi3-mini-q4_0.gguf`,
+          name: 'Phi-3.5 Mini Instruct',
+          size: 2.3 * 1024 * 1024 * 1024, // 2.3GB
+          path: `${RNFS.DocumentDirectoryPath}/models/Phi-3.5-mini-instruct-Q4_K_M.gguf`,
           isDownloaded: false,
           isLoaded: false,
           description: 'Compact model optimized for mobile devices',
-          capabilities: ['text-generation', 'summarization', 'qa']
+          capabilities: ['text-generation', 'summarization', 'qa', 'reasoning']
         }
       ];
 
@@ -141,19 +141,31 @@ class AIService {
       this.loadingProgress = 0;
 
       console.log(`🔄 Loading model: ${model.name}`);
+      console.log(`📍 Model path: ${model.path}`);
 
-      // Initialize LlamaContext with the model
-      this.llamaContext = await LlamaContext.initFromFile(model.path, {
+      // Check if file exists
+      const exists = await RNFS.exists(model.path);
+      if (!exists) {
+        throw new Error(`Model file not found at ${model.path}`);
+      }
+
+      // Initialize LlamaContext with correct API
+      this.llamaContext = await LlamaContext.init({
+        model: model.path,
         // GPU acceleration if available
-        ngl: 32, // GPU layers
+        n_gpu_layers: 0, // Start with CPU only for compatibility
         // Memory optimization
-        nCtx: 2048, // Context length
-        nBatch: 512, // Batch size
+        n_ctx: 2048, // Context length
+        n_batch: 512, // Batch size
         // Performance settings
-        nThreads: -1, // Use all available threads
+        n_threads: -1, // Use all available threads
+        use_mmap: true,
+        use_mlock: false,
+        verbose_prompt: false,
         // Callback for loading progress
-        onProgress: (progress: number) => {
+        progress_callback: (progress: number) => {
           this.loadingProgress = progress;
+          console.log(`📊 Loading progress: ${Math.round(progress * 100)}%`);
         }
       });
 
@@ -171,7 +183,7 @@ class AIService {
     } catch (error) {
       this.isModelLoading = false;
       console.error('❌ Failed to load model:', error);
-      Alert.alert('Model Loading Error', error.message);
+      Alert.alert('Model Loading Error', `Failed to load ${model?.name}: ${error.message}`);
       return false;
     }
   }
@@ -440,11 +452,11 @@ Analysis:`;
         await RNFS.mkdir(modelsDir);
       }
 
-      // Download URLs (these would be real URLs in production)
+      // Updated working download URLs for latest models
       const downloadUrls: { [key: string]: string } = {
-        'gemma-2b-it': 'https://huggingface.co/google/gemma-2b-it-GGUF/resolve/main/gemma-2b-it.q4_0.gguf',
-        'llama3-8b-instruct': 'https://huggingface.co/microsoft/Phi-3-mini-4k-instruct-gguf/resolve/main/Phi-3-mini-4k-instruct-q4.gguf',
-        'phi3-mini': 'https://huggingface.co/microsoft/Phi-3-mini-4k-instruct-gguf/resolve/main/Phi-3-mini-4k-instruct-q4.gguf'
+        'gemma-2b-it': 'https://huggingface.co/bartowski/gemma-2-2b-it-GGUF/resolve/main/gemma-2-2b-it-Q4_K_M.gguf',
+        'llama3-8b-instruct': 'https://huggingface.co/bartowski/Meta-Llama-3.1-8B-Instruct-GGUF/resolve/main/Meta-Llama-3.1-8B-Instruct-Q4_K_M.gguf',
+        'phi3-mini': 'https://huggingface.co/bartowski/Phi-3.5-mini-instruct-GGUF/resolve/main/Phi-3.5-mini-instruct-Q4_K_M.gguf'
       };
 
       const url = downloadUrls[modelId];
@@ -453,26 +465,68 @@ Analysis:`;
       }
 
       console.log(`📥 Downloading model: ${model.name}`);
+      console.log(`📍 URL: ${url}`);
+      console.log(`💾 Size: ${model.size / (1024 * 1024 * 1024)}GB`);
 
       const downloadResult = await RNFS.downloadFile({
         fromUrl: url,
         toFile: model.path,
+        headers: {
+          'User-Agent': 'TurboNotes/1.0 (React Native)',
+          'Accept': '*/*',
+          'Accept-Encoding': 'identity'
+        },
+        progressInterval: 1000,
         progress: (res) => {
           const progress = (res.bytesWritten / res.contentLength) * 100;
+          console.log(`📊 Download progress: ${Math.round(progress)}% (${Math.round(res.bytesWritten / 1024 / 1024)}MB / ${Math.round(res.contentLength / 1024 / 1024)}MB)`);
           onProgress?.(progress);
         }
       }).promise;
 
       if (downloadResult.statusCode === 200) {
+        // Verify file size
+        const stat = await RNFS.stat(model.path);
+        const actualSizeMB = Math.round(stat.size / 1024 / 1024);
+        console.log(`📏 Downloaded size: ${actualSizeMB}MB`);
+        
         model.isDownloaded = true;
         console.log(`✅ Model ${model.name} downloaded successfully`);
         return true;
       } else {
-        throw new Error(`Download failed with status ${downloadResult.statusCode}`);
+        let errorMessage = `Download failed with HTTP status ${downloadResult.statusCode}`;
+        
+        switch (downloadResult.statusCode) {
+          case 401:
+            errorMessage = 'Download failed: Access denied. The model may require authentication.';
+            break;
+          case 403:
+            errorMessage = 'Download failed: Access forbidden. You may need special permissions.';
+            break;
+          case 404:
+            errorMessage = 'Download failed: Model not found. The file may have been moved.';
+            break;
+          case 429:
+            errorMessage = 'Download failed: Too many requests. Please wait before trying again.';
+            break;
+        }
+        
+        throw new Error(errorMessage);
       }
 
     } catch (error) {
       console.error(`❌ Failed to download model ${model.name}:`, error);
+      
+      // Clean up partial download
+      try {
+        const exists = await RNFS.exists(model.path);
+        if (exists) {
+          await RNFS.unlink(model.path);
+        }
+      } catch (cleanupError) {
+        console.error('❌ Failed to clean up partial download:', cleanupError);
+      }
+      
       throw error;
     }
   }
@@ -530,3 +584,4 @@ Analysis:`;
 // Singleton instance
 export const aiService = new AIService();
 export default aiService;
+

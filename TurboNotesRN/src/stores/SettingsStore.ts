@@ -332,3 +332,4 @@ class SettingsStore {
 }
 
 export default SettingsStore;
+

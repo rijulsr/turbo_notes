@@ -40,3 +40,4 @@ export class ChatSessionModel extends Model {
 
   @children('messages') messages!: Query<ChatMessageModel>;
 }
+

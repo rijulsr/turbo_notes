@@ -13,7 +13,8 @@ import {
   Modal,
 } from 'react-native';
 import modelManager from './src/services/ModelManager';
-import ModelManagerScreen from './src/screens/ModelManagerScreen';
+import EnhancedModelManagerScreen from './src/screens/EnhancedModelManagerScreen';
+import ImprovedAITestScreen from './src/screens/ImprovedAITestScreen';
 
 interface Note {
   id: string;
@@ -31,6 +32,7 @@ function App(): React.JSX.Element {
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
   const [showModelManager, setShowModelManager] = useState(false);
+  const [showAITest, setShowAITest] = useState(false);
   const [activeModel, setActiveModel] = useState(null);
   const [aiProcessing, setAiProcessing] = useState(false);
 
@@ -45,6 +47,18 @@ function App(): React.JSX.Element {
   const cardStyle = {
     backgroundColor: isDarkMode ? '#2a2a2a' : '#f5f5f5',
     borderColor: isDarkMode ? '#404040' : '#e0e0e0',
+  };
+
+  // Theme object for Enhanced Model Manager
+  const theme = {
+    background: isDarkMode ? '#1a1a1a' : '#ffffff',
+    surface: isDarkMode ? '#2a2a2a' : '#f5f5f5',
+    primary: '#007AFF',
+    text: isDarkMode ? '#ffffff' : '#000000',
+    textSecondary: isDarkMode ? '#999999' : '#666666',
+    border: isDarkMode ? '#404040' : '#e0e0e0',
+    error: '#FF3B30',
+    accent: '#FF9500',
   };
 
   useEffect(() => {
@@ -270,12 +284,21 @@ Category:`;
             </Text>
           </View>
           
-          <TouchableOpacity
-            style={[styles.modelManagerButton, { backgroundColor: '#6366f1' }]}
-            onPress={() => setShowModelManager(true)}
-          >
-            <Text style={styles.modelManagerButtonText}>🤖 Models</Text>
-          </TouchableOpacity>
+          <View style={{ flexDirection: 'row', gap: 8 }}>
+            <TouchableOpacity
+              style={[styles.modelManagerButton, { backgroundColor: '#6366f1' }]}
+              onPress={() => setShowModelManager(true)}
+            >
+              <Text style={styles.modelManagerButtonText}>🤖 Models</Text>
+            </TouchableOpacity>
+            
+            <TouchableOpacity
+              style={[styles.modelManagerButton, { backgroundColor: '#10b981' }]}
+              onPress={() => setShowAITest(true)}
+            >
+              <Text style={styles.modelManagerButtonText}>🧪 Test AI</Text>
+            </TouchableOpacity>
+          </View>
         </View>
         
         {/* AI Status */}
@@ -445,7 +468,27 @@ Category:`;
               <Text style={styles.closeButtonText}>✕ Close</Text>
             </TouchableOpacity>
           </View>
-          <ModelManagerScreen />
+          <EnhancedModelManagerScreen theme={theme} />
+        </View>
+      </Modal>
+
+      {/* AI Test Modal */}
+      <Modal
+        visible={showAITest}
+        animationType="slide"
+        presentationStyle="fullScreen"
+        onRequestClose={() => setShowAITest(false)}
+      >
+        <View style={{ flex: 1 }}>
+          <View style={[styles.modalHeader, { backgroundColor: cardStyle.backgroundColor, borderBottomColor: cardStyle.borderColor }]}>
+            <TouchableOpacity
+              style={[styles.closeButton, { backgroundColor: '#ef4444' }]}
+              onPress={() => setShowAITest(false)}
+            >
+              <Text style={styles.closeButtonText}>✕ Close</Text>
+            </TouchableOpacity>
+          </View>
+          <ImprovedAITestScreen />
         </View>
       </Modal>
     </SafeAreaView>

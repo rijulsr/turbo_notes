@@ -28,3 +28,4 @@ export class ChatMessageModel extends Model {
 
   @relation('chat_sessions', 'session_id') session!: Relation<ChatSessionModel>;
 }
+

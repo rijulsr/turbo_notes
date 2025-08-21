@@ -30,3 +30,4 @@ export const database = new Database({
 
 // Export for use in stores and components
 export default database;
+
