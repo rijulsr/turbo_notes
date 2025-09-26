@@ -6,7 +6,9 @@
 
 import RNFS from 'react-native-fs';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { initLlama, LlamaContext } from 'llama.rn';
+// Avoid hard import at module load to prevent startup crashes on unsupported archs
+// We'll lazy-load llama.rn when needed
+// import { initLlama, LlamaContext } from 'llama.rn';
 import { makeObservable, observable, action, computed } from 'mobx';
 import { huggingFaceService, ProcessedModel } from './HuggingFaceService';
 
@@ -68,11 +70,18 @@ export interface ChatTemplate {
   eosToken?: string;
 }
 
+type LlamaModule = {
+  initLlama?: () => Promise<void> | void;
+  LlamaContext: {
+    init: (config: any) => Promise<any>;
+  };
+};
+
 class EnhancedModelManager {
   // Observable state
   @observable models: LocalModel[] = [];
   @observable activeModel: LocalModel | null = null;
-  @observable activeContext: LlamaContext | null = null;
+  @observable activeContext: any | null = null;
   @observable downloadProgress: Map<string, DownloadProgress> = new Map();
   @observable isInitialized = false;
   @observable llamaInitialized = false;
@@ -81,6 +90,7 @@ class EnhancedModelManager {
   // Configuration
   private modelsDir: string;
   private settingsDir: string;
+  private llamaModule: LlamaModule | null = null;
   private modelListeners: Array<{
     onModelLoaded?: (model: LocalModel) => void;
     onModelUnloaded?: () => void;
@@ -132,6 +142,18 @@ class EnhancedModelManager {
     this.modelsDir = `${RNFS.DocumentDirectoryPath}/models`;
     this.settingsDir = `${RNFS.DocumentDirectoryPath}/model_settings`;
     this.initialize();
+  }
+
+  private async ensureLlamaLoaded(): Promise<boolean> {
+    if (this.llamaModule) return true;
+    try {
+      const mod: any = await import('llama.rn');
+      this.llamaModule = mod as LlamaModule;
+      return true;
+    } catch (error) {
+      console.error('❌ Failed to load llama.rn module:', error);
+      return false;
+    }
   }
 
   @action
@@ -462,7 +484,7 @@ class EnhancedModelManager {
    * Load a model with proper llama.rn API usage
    */
   @action
-  async loadModel(modelId: string): Promise<LlamaContext> {
+  async loadModel(modelId: string): Promise<any> {
     const model = this.models.find(m => m.id === modelId);
     if (!model) {
       throw new Error(`Model ${modelId} not found`);
@@ -482,9 +504,15 @@ class EnhancedModelManager {
     console.log(`📍 Path: ${model.filePath}`);
 
     try {
+      const ok = await this.ensureLlamaLoaded();
+      if (!ok || !this.llamaModule) {
+        throw new Error('llama.rn not available on this device/architecture');
+      }
       // Initialize llama.rn if not already done
       if (!this.llamaInitialized) {
-        await initLlama();
+        if (typeof this.llamaModule.initLlama === 'function') {
+          await this.llamaModule.initLlama();
+        }
         this.llamaInitialized = true;
         console.log('🚀 Llama.rn initialized successfully');
       }
@@ -507,7 +535,7 @@ class EnhancedModelManager {
       }
 
       // Load the model using correct API
-      this.activeContext = await LlamaContext.init(modelConfig);
+      this.activeContext = await this.llamaModule.LlamaContext.init(modelConfig);
       this.activeModel = model;
       
       // Update model status
@@ -552,7 +580,9 @@ class EnhancedModelManager {
       console.log(`🔄 Unloading model: ${this.activeModel?.name}`);
       
       try {
-        await this.activeContext.release();
+        if (this.activeContext && typeof this.activeContext.release === 'function') {
+          await this.activeContext.release();
+        }
       } catch (error) {
         console.error('❌ Error releasing context:', error);
       }
