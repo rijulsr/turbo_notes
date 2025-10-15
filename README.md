@@ -232,7 +232,7 @@ cargo build --release --target x86_64-unknown-linux-gnu
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-## 🐛 Troubleshooting
+##  Troubleshooting
 
 ### Auto-Start Not Working
 
