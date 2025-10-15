@@ -13,7 +13,7 @@ A minimalist, cross-platform, terminal-based note-taking application written in 
 - **Keyboard-Driven**: Efficient navigation without mouse
 - **Background Mode**: Runs quietly in the background
 
-## 🚀 Quick Start
+##  Quick Start
 
 ### Installation
 
