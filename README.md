@@ -321,4 +321,4 @@ Supported colors: `black`, `red`, `green`, `yellow`, `blue`, `magenta`, `cyan`, 
 
 ---
 
-Made with ❤️ and Rust. Happy note-taking! 🚀
+Made with and Rust. Happy note-taking! 
